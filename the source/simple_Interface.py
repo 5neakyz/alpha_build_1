@@ -11,7 +11,7 @@ import pathlib
 class MyApp():
     def __init__(self, root):
         
-        root.title("5neakyz")
+        root.title("ML Multi Units")
         root.geometry("1024x768")
 
 # - Variables - - - - - - - - - - - - - - - - - - - - - -

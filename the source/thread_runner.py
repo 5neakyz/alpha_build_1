@@ -45,6 +45,11 @@ class ThreadRunner():
                         obj.erase_config()
                         obj.firmware_path =self.firmware_path
                         state1 = obj.push(2)
+                        time.sleep(20)# it takes like 10-14 seconds to install the firmware
+                        for _ in range(5):
+                            live = obj.is_alive()
+                            if live == True:
+                                break
                         state2 = obj.is_firmware()
                         if state1 == True and state2 == True: 
                             return [obj.device , True]
@@ -75,7 +80,7 @@ class ThreadRunner():
                     return f"{obj.device} unsure how you got here but hey here we are, theres somehow no mode selected"
 
         else:
-            return f"{obj.device} {status}cannot get read on menu, please debug using terra term"
+            return f"{obj.device} {False}cannot get read on menu, please debug using terra term"
 
 
 
