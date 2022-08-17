@@ -134,7 +134,10 @@ class MyApp():
         self.push_command_btn.pack()
 
         self.color_return_frame = Frame(my_frame1)
-        self.color_return_frame.pack()
+        self.color_return_frame.pack(padx=10, pady=10)
+
+        self.disconnect_btn = ttk.Button(my_frame1,text="Disconnect",command=lambda: threading.Thread(target=self.disconnect).start())
+        self.disconnect_btn.pack()
 
 # - Notebook device1 - - - - - - - - - - - - - - - - - - - - -
         """
@@ -249,10 +252,23 @@ class MyApp():
                 count+=1
             myLabel = Label(self.color_code_list, text=object.device,bg=color)
             myLabel.grid(row=0, column=i)
-        if count == len(self.device_objects):
+        if count == len(self.device_objects) and len(self.device_objects) != 0:
             self.push_command_btn.configure(state=NORMAL)
+
+    def disconnect(self):
+        self.clear_frame(self.color_return_frame)
+        self.clear_frame(self.color_code_list)
+        self.device_objects = []
+        for device in self.selected_devices:
+            self.selected_devices.remove(device)
+        self.sltcd_devices_str.set(self.selected_devices)
+        self.push_command_btn.configure(state=DISABLED)
+
+
     def run(self):
         self.running_state_str.set("RUNNING...")
+        self.push_command_btn.configure(state=DISABLED)
+        self.disconnect_btn.configure(state=DISABLED)
         my_thread = ThreadRunner(self.device_objects)
         my_thread.mode = self.var.get()#raido button list values
         my_thread.personality_path = self.personality_path
@@ -267,3 +283,5 @@ class MyApp():
             myLabel = Label(self.color_return_frame,text=result[0],bg=color)
             myLabel.grid(row=0,column=i)
         self.running_state_str.set("")
+        self.push_command_btn.configure(state=NORMAL)
+        self.disconnect_btn.configure(state=NORMAL)
