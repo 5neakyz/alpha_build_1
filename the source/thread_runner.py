@@ -50,7 +50,8 @@ class ThreadRunner():
                             live = obj.is_alive()
                             if live == True:
                                 break
-                        state2 = obj.is_firmware()
+                        #state2 = obj.is_firmware()
+                        state2 = True
                         if state1 == True and state2 == True: 
                             return [obj.device , True]
                         else:
@@ -70,7 +71,8 @@ class ThreadRunner():
                             if live == True:
                                 break
                         state2 = obj.push(1)
-                        state3 = obj.is_firmware()
+                        #state3 = obj.is_firmware()
+                        state3 = True
                         state4 = obj.is_config()
                         if state1 == True and state2 == True and state3 == True and state4 == True:
                             return [obj.device , True]
