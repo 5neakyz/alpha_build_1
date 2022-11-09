@@ -1,12 +1,17 @@
-# Hello
+# READ ME
 
-## to install
+## To Install
 download the zip for the file
 
 extract zip
 
+in the output folder there is another folder called something along the lines of Multi_ml
+within this file there is an executable file something along of the lines of Run_Multi_ml.exe
 
+create a shortcut for this file and simply doubble click to run the file
 
-to run the application click the run.exe file in the folder
+# Documentation
 
-on the application is a help button, open the documentation to see a poorly put togeher guide 
+## Quick Fire How To
+
+## Ins and Outs
