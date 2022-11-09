@@ -1,7 +1,11 @@
 # Hello
-in the output folder download the run or run_with_debug_terminal folder
+
+## to install
+download the zip for the file
 
 extract zip
+
+
 
 to run the application click the run.exe file in the folder
 
