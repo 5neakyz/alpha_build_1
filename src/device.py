@@ -37,6 +37,7 @@ class Device():
             #self.ser.write(chr(27).encode())
             time.sleep(0.1)
             x = self.ser.readlines()
+            print(x)
             if "Main Menu" in str(x):
                 return True
             time.sleep(0.5)

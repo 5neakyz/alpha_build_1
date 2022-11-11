@@ -299,6 +299,8 @@ class MyApp():
 
 
     def run(self):
+        start_time = time.time()
+        print(f"START TIME: {start_time}")
         self.clear_frame(self.color_return_frame)
         self.my_pb_object.progress = 0
         self.progress_bar["value"] = 0
@@ -313,6 +315,7 @@ class MyApp():
         #print("runing function next")
         self.update_progress()
         results = my_thread.thread_run()
+        print(f"RESULT TIME: {time.time()- start_time}")
         print(results)
         self.progress_bar['value'] = self.my_pb_object.total
         for i,result in enumerate(results):
