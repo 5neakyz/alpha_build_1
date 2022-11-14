@@ -6,7 +6,8 @@ import serial.tools.list_ports
 import time
 import os
 import threading
-
+import logging
+import concurrent.futures
 #my classes
 from thread_runner import ThreadRunner
 from pb_data import pb_data
@@ -19,7 +20,7 @@ class MyApp():
         #self.root_window.geometry("600x600")
         self.root_window.option_add("*tearOff", False) # This is always a good idea
         # Import the tcl file
-        self.root_window.tk.call('source', 'C:/Users/bknox/Multi-ML-1.0/gui_design/Forest-ttk-theme-master/forest-dark.tcl')
+        self.root_window.tk.call('source', 'gui_design/Forest-ttk-theme-master/forest-dark.tcl')
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
         # Make the app responsive
@@ -38,7 +39,7 @@ class MyApp():
         self.COM_items = []
         for item in self.comlist:
             self.COM_items.append(item.device)
-
+        self.COM_items.sort()
         self.selected_coms = []
         self.selected_coms_str = tk.StringVar(value=self.selected_coms)
         self.com_objects = []
@@ -61,6 +62,7 @@ class MyApp():
         self.listbox = tk.Listbox(
             self.device_selection_frame,
             listvariable=self.list_box_items,
+            font=('',14),
             height=6)
 
         self.listbox.pack(padx=10, pady=10,expand=True)
@@ -172,6 +174,9 @@ class MyApp():
         self.selected_coms_str.set(self.selected_coms)
 
 
+    def is_connection_live(self,com_object):
+        return com_object.device,com_object.is_alive()
+
     def connect_btn_press(self):
         #check to see if any objects already exist
         #if no objects then temp list is skipped
@@ -186,14 +191,26 @@ class MyApp():
                 self.com_objects.append(Device(device))
         #list comprehension is needed to remove objects of COMs that are no longer selected
         self.com_objects = [x for x in self.com_objects if x.device in self.selected_coms]
-
         self.clear_frame(self.selected_devices_frame)
-        for i, object in enumerate(self.com_objects):
+        '''
+        using concurrent threading to check if we can connect to units
+        being able to connect is being able to read the main menu
+        it will fail if we cant even establish a serial connection
+        this does mean that if, say a units voltage is too low it will count as fail
+        but will not given reasons why
+        '''
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+            tasks = [executor.submit(self.is_connection_live,device) for device in self.com_objects]
+            for x in concurrent.futures.as_completed(tasks):
+                results.append(x.result())
+        # now we iterate through our results, to add to gui object[0] is com port, [1] is true or false
+        for i, object in enumerate(results):
             color = self.hex_red
-            alive = object.is_alive()
-            if alive == True:
+            alive = object[1]
+            if alive ==True:
                 color = self.hex_green
-            my_connection_label = ttk.Label(self.selected_devices_frame,text=object.device,background=color)
+            my_connection_label = ttk.Label(self.selected_devices_frame,text=object[0],background=color)
             my_connection_label.pack(ipadx=5, ipady=5,padx=5, pady=5,side="left",expand=True)
 
         self.selected_devices_frame.configure(text="Selected Devices")
@@ -217,4 +234,7 @@ class MyApp():
         self.firmware_path_str.set(fPath)
 
 if __name__ == '__main__':
+    format = "%(asctime)s.%(msecs)04d: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
     game = MyApp(tk.Tk())

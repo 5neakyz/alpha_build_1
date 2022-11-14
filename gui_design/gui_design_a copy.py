@@ -1,42 +1,36 @@
-import tkinter as tk
-from tkinter import ttk 
+import logging
+import threading
+import time
+import concurrent.futures
+def thread_function(name):
+    logging.info("Thread %s: starting", name)
+    time.sleep(2)
+    logging.info("Thread %s: finishing", name)
+    return True
 
-class MyApp:
-    def __init__(self,root):
-        self.root_window = root
-        # Import the tcl file
-        self.root_window.call('source', 'C:/Users/sneak/Multi-ML-1.0/gui_design/Forest-ttk-theme-master/forest-dark.tcl')
+if __name__ == "__main__":
+    format = "%(asctime)s.%(msecs)04d: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
 
-        # Set the theme with the theme_use method
-        ttk.Style().theme_use('forest-dark')
+    names = ["1","2","3"]
+    results = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+        tasks = [executor.submit(thread_function,device) for device in names]
+        for x in concurrent.futures.as_completed(tasks):
+            results.append(x.result())
+    print(results)
 
-        self.who_goes_first = tk.StringVar(None, "B")
-        #create who goes first variable
-        #self.who_goes_first = tk.StringVar()
-        self.who_goes_first.set("B")
-        #black radio button
-        self._who_goes_first_radiobutton = ttk.Radiobutton(
-            self.root_window,
-            text = 'Black',
-            variable = self.who_goes_first,
-            value = 'B')    
-        self._who_goes_first_radiobutton.grid(row=0, column=1)
 
-        #white radio button
-        self._who_goes_first_radiobutton = ttk.Radiobutton(
-            self.root_window,
-            text = 'White',
-            variable = self.who_goes_first,
-            value = 'W')    
-        self._who_goes_first_radiobutton.grid(row=1, column=1)
 
-    def start(self) -> None:
-        self.root_window.mainloop()
+    # threads = list()
+    # for index in range(3):
+    #     logging.info("Main    : create and start thread %d.", index)
+    #     x = threading.Thread(target=thread_function, args=(index,))
+    #     threads.append(x)
+    #     x.start()
 
-if __name__ == '__main__':
-
-    root = tk.Tk()
-    game = MyApp(root)
-    game.start()
-    # MyApp(root)
-    # root.mainloop()
+    # for index, thread in enumerate(threads):
+    #     logging.info("Main    : before joining thread %d.", index)
+    #     thread.join()
+    #     logging.info("Main    : thread %d done", index)
