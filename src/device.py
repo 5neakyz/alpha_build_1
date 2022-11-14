@@ -37,7 +37,7 @@ class Device():
             #self.ser.write(chr(27).encode())
             time.sleep(0.1)
             x = self.ser.readlines()
-            print(x)
+            #print(x)
             if "Main Menu" in str(x):
                 return True
             time.sleep(0.5)
@@ -68,7 +68,7 @@ class Device():
             list_of_matches = re.findall("\d\.\d\d\.\d", self.firmware_path)
             vers = list_of_matches[0]
         except Exception as e: print(e)
-        print(vers)
+        #print(vers)
         self.write_commands(["esc", "4"])
         x = self.ser.readlines()
         if vers == None:
