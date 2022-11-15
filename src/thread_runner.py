@@ -57,9 +57,9 @@ class ThreadRunner():
         else:
             obj.firmware_path =self.firmware_path
             if obj.erase_config() and obj.is_config() == False and obj.push(2): 
-                #time.sleep(20)# it takes like 10-14 seconds to install the firmware
-                for _ in range(50):
-                    print(f"attempt {_} of 50 : total time waited {_*0.5}")
+                starttime = time.time()
+                for _ in range(20):# it takes like 10-14 seconds to install the firmware
+                    print(f"attempt {_} of 20 : total time waited {time.time()-starttime}")
                     live = obj.is_alive()
                     if live == True:
                         break
@@ -80,16 +80,14 @@ class ThreadRunner():
             obj.personality_path =self.personality_path
             obj.firmware_path =self.firmware_path
             if obj.erase_config() and obj.is_config() == False and obj.push(2): 
-                time.sleep(20)# it takes like 10-14 seconds to install the firmware, unit locks up on install
-                for _ in range(5):
+                starttime = time.time()
+                for _ in range(20):
                     live = obj.is_alive()
-                    print(f"attempt {_} of 50 : total time waited {_*0.5}")
+                    print(f"attempt {_} of 20 : total time waited {time.time()-starttime}")
                     if live == True:
                         break
-                    print("sleeping")
                     time.sleep(0.5)
                 else: return [obj.device,False]
-                print("pushing perss")
                 if obj.push(1) and obj.is_config(): 
                     return [obj.device , True]
                 else:

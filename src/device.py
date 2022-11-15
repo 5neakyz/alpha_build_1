@@ -32,7 +32,7 @@ class Device():
     def is_alive (self):
         if self.safe_serial==False:
             return False
-        for _ in range(10):
+        for _ in range(3):#attempts 3 times
             self.write_commands(["esc"])
             x = self.ser.readlines()
             if "Main Menu" in str(x):

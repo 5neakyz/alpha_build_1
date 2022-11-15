@@ -254,6 +254,7 @@ class MyApp():
             self.progress_bar['value'] = self.my_pb_object.progress
             #print(f"value{self.my_pb_object.progress}")
             time.sleep(0.1)
+        return
             
 
     def update_progress(self):
@@ -267,12 +268,8 @@ class MyApp():
             pers_size = os.stat(self.personality_path).st_size
         self.my_pb_object.total = (firm_size * len(self.com_objects)) + (pers_size * len(self.com_objects))
         self.progress_bar['maximum'] = self.my_pb_object.total
-        # results = []
-        # with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-        #     tasks = [executor.submit(self.is_connection_live,device) for device in self.com_objects]
-        #     for x in concurrent.futures.as_completed(tasks):
-        #         results.append(x.result())
-        threading.Thread(target=self.update_progress_loop).start()
+
+        threading.Thread(target=self.update_progress_loop).start()#thread will auto close on completion
 
     def run_btn_press(self):
         #update gui
