@@ -14,12 +14,9 @@ if __name__ == "__main__":
                         datefmt="%H:%M:%S")
 
     names = ["1","2","3"]
-    results = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-        tasks = [executor.submit(thread_function,device) for device in names]
-        for x in concurrent.futures.as_completed(tasks):
-            results.append(x.result())
-    print(results)
+    results = [["1",True],["2",False],["3",False]]
+    print(any(False in result for result in results))
+
 
 
 

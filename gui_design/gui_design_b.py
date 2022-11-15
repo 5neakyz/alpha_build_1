@@ -81,7 +81,7 @@ class MyApp():
         self.radio_1=ttk.Radiobutton(self.config_options_frame, text="Erase Config",variable=self.var,value=1).pack(padx=20, pady=15,anchor="nw",side="top")
         self.radio_2=ttk.Radiobutton(self.config_options_frame, text="Push Personality Only",variable=self.var,value=2).pack(padx=20, pady=15,anchor="nw",side="top")
         self.radio_3=ttk.Radiobutton(self.config_options_frame, text="Push Firmware Only",variable=self.var,value=3).pack(padx=20, pady=15,anchor="nw",side="top")
-        self.radio_4=ttk.Radiobutton(self.config_options_frame, text="Push Both Firmware and Personality",value=4,variable=self.var).pack(padx=20, pady=15,anchor="nw",side="top")
+        self.radio_4=ttk.Radiobutton(self.config_options_frame, text="Push Both Firmware and Personality",value=4,variable=self.var,state="disabled").pack(padx=20, pady=15,anchor="nw",side="top")
 
         #file selection
         self.selected_firmware_path = tk.StringVar(value="C:/Users/sneak/Multi-ML-1.0/gui_design/Forest-ttk-theme-master/forest-dark.tcl")
@@ -99,7 +99,7 @@ class MyApp():
         self.personality_frame_box = ttk.LabelFrame(self.select_files_frame,text="Personality Path")
         self.personality_frame_box.pack(padx=10, pady=10,expand=True)
 
-        self.slct_firm_path_btn = ttk.Button(self.select_files_frame,text="Select Firmware")
+        self.slct_firm_path_btn = ttk.Button(self.select_files_frame,text="Select Firmware",state="disabled")
         self.slct_firm_path_btn.pack(padx=10, pady=10,expand=True,side="left")
 
         self.selected_personality_lbl = ttk.Label(self.personality_frame_box,textvariable=self.selected_firmware_path,wraplength=300)

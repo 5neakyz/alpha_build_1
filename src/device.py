@@ -34,10 +34,7 @@ class Device():
             return False
         for _ in range(10):
             self.write_commands(["esc"])
-            #self.ser.write(chr(27).encode())
-            time.sleep(0.1)
             x = self.ser.readlines()
-            #print(x)
             if "Main Menu" in str(x):
                 return True
             time.sleep(0.5)
