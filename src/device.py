@@ -134,3 +134,38 @@ class Device():
         status = modem.send(stream)
         #print(status)
         return status
+
+    def read_config(self):
+        for _ in range(5):
+            live = self.is_alive()
+            out = ""
+            if live == True:
+                self.write_commands(["esc", "3"])
+                x = self.ser.readlines()
+                for item in x:
+                    y = item.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ').replace(b'\x1b[2J\x1b[2J\r',b'').decode("utf-8")
+                    out += y + '\n'
+                break
+            else: return[self.device,"No READ"]
+        return [self.device,out]
+
+    def read_status(self):
+        for _ in range(5):
+            print(_)
+            live = self.is_alive()
+            if live == True:
+                self.write_commands(["esc", "4"])
+                out = ""
+                for _ in range (50):
+                    x = self.ser.readline()
+                    if "Status Screen" in str(x):
+                        for _ in range(30):
+                            x = self.ser.readline()
+                            y = x.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                            out +=(y.decode('utf-8')+ ' \n')
+                        break
+                #print(f"OUT: {out}")
+                break
+            else: return[self.device,"No READ"]
+
+        return [self.device,out]

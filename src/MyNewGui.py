@@ -15,6 +15,7 @@ from device import Device
 
 class MyApp():
     def __init__(self,root):
+# - - - gui config - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.root_window = root
         self.root_window.title("ML Multi Units")
         #self.root_window.geometry("600x600")
@@ -24,12 +25,12 @@ class MyApp():
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
         # Make the app responsive
-        root.columnconfigure(index=0, weight=1)
-        root.columnconfigure(index=1, weight=1)
-        root.columnconfigure(index=2, weight=1)
-        root.rowconfigure(index=0, weight=1)
-        root.rowconfigure(index=1, weight=1)
-        root.rowconfigure(index=2, weight=1)
+        self.root_window.columnconfigure(index=0, weight=1)
+        self.root_window.columnconfigure(index=1, weight=1)
+        self.root_window.columnconfigure(index=2, weight=2)
+        self.root_window.rowconfigure(index=0, weight=1)
+        self.root_window.rowconfigure(index=1, weight=1)
+        self.root_window.rowconfigure(index=2, weight=1)
 
  # - - - vars - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         
@@ -54,7 +55,34 @@ class MyApp():
         self.hex_red = '#b40d1b'
         self.hex_green = '#217346'
 
-        #device selection
+
+# - Menus - - - - - - - - - - - - - - - - - - - - - - - -
+        menubar = tk.Menu(root)
+
+        menu_file = tk.Menu(menubar, tearoff=0)
+        menu_window =tk. Menu(menubar, tearoff=0)
+        menu_help = tk.Menu(menubar, tearoff=0)
+        menu_more = tk.Menu(menubar, tearoff=0)
+
+        menubar.add_cascade(menu=menu_file, label='File')
+        menubar.add_cascade(menu=menu_window, label='Window')
+        menubar.add_cascade(menu=menu_help, label='Help')
+        menubar.add_cascade(menu=menu_more, label='More')
+
+    # - File Menu - - - - - - - - - - - - - - - - - - - - - - -
+    # - Window Menu - - - - - - - - - - - - - - - - - - - - - -
+    # - Help Menu - - - - - - - - - - - - - - - - - - - - - - -
+    # - More Menu
+        menu_more.add_command(label="Do you want More?",command=self.show_more)
+        menu_more.add_separator()
+        menu_more.add_separator()
+        menu_more.add_command(label="3: View Config",command=self.get_config_info)
+        menu_more.add_command(label="4: Status Screen",command=self.get_status_info)
+
+        self.root_window.config(menu=menubar)
+
+
+#- - - -device selection - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         self.device_selection_frame = ttk.LabelFrame(self.root_window,text="Select Devices")
         self.device_selection_frame.grid(row=0, column=0, padx=(20, 10), pady=10, sticky="nsew")
 
@@ -91,7 +119,7 @@ class MyApp():
         self.disconnect_device_btn = ttk.Button(self.device_selection_frame, text="Disconnect",command=lambda: threading.Thread(target=self.disconnect_btn_press).start())
         self.disconnect_device_btn.pack(padx=10,pady=10,expand=True,anchor="s",side="left")
 
-        #radio box - config type/ option
+# - - - radio box - config type/ option - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         self.radio_option = tk.IntVar(value=1)
         #box for config options
         self.config_options_frame = ttk.LabelFrame(self.root_window,text="Config Options")
@@ -102,8 +130,7 @@ class MyApp():
         self.radio_3=ttk.Radiobutton(self.config_options_frame, text="Push Firmware Only",variable=self.radio_option,value=3).pack(padx=5, pady=5,anchor="w")
         self.radio_4=ttk.Radiobutton(self.config_options_frame, text="Push Both Firmware and Personality",value=4,variable=self.radio_option).pack(padx=5, pady=5,anchor="w")
 
-        #file selection
-
+# - - - file selection - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         self.select_files_frame = ttk.LabelFrame(self.root_window,text="Select Files")
         self.select_files_frame.grid(row=1, column=0,padx=(20, 10), pady=10, sticky="nsew")
 
@@ -125,7 +152,7 @@ class MyApp():
         self.slct_pers_path_btn = ttk.Button(self.select_files_frame,text="Select Personality",command=self.get_personality_path)
         self.slct_pers_path_btn.pack(padx=10,pady=10,expand=True,anchor="s",side="left")
 
-        # run 
+# - - - Run Frame - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.run_frame = ttk.LabelFrame(self.root_window,text="Run")
         self.run_frame.grid(row=1, column=1,padx=(20, 10), pady=10, sticky="nsew")
 
@@ -142,7 +169,12 @@ class MyApp():
         self.run_btn = ttk.Button(self.run_frame,text="Run",state="disabled",command=lambda: threading.Thread(target=self.run_btn_press).start())
         self.run_btn.pack(padx=10, pady=10,expand=True,anchor="sw",side="left")
 
+# - - - Notebook (work in progress) - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        '''this is dynamically generated see functions below
+        '''
+        self.notebook = ttk.Notebook(self.root_window)
 
+        
         #sizegrip
         sizegrip = ttk.Sizegrip(self.root_window)
         sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
@@ -156,6 +188,52 @@ class MyApp():
         
         self.root_window.mainloop()
 
+# - FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - MORE MENU
+# - Notebook Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    def show_more(self):
+        if self.notebook.grid_info() == {}:
+            self.root_window.columnconfigure(index=2, weight=3,minsize=400)
+            self.notebook.grid(row=0,column=2,columnspan=3,sticky="nsew", rowspan=3,padx=10,pady=10,)
+        else:
+            self.root_window.columnconfigure(index=2, weight=3,minsize=0)
+            self.notebook.grid_forget()
+
+    def the_more(self,screen=None):
+        self.clear_frame(self.notebook)
+        for object in self.com_objects:
+            logging.info(" Starting")
+            new_pad = ttk.Frame(self.notebook)
+            self.notebook.add(new_pad,text=object.device)
+
+            if screen == "config":
+                label = tk.Text(new_pad)
+                label.pack(fill="y")
+                label.insert("end",object.read_config())
+            if screen == "status":
+                label = tk.Text(new_pad)
+                label.pack(fill="y")
+                label.insert("end",object.read_status())
+            logging.info(" Fetched")
+    def get_config_info(self):
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        self.the_more("config")
+        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+
+    def get_status_info(self):
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        self.the_more("status")
+        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+
+
+    def set_btns_disabled(self,*buttons):
+        for button in buttons:
+            button.configure(state="disabled")
+
+    def set_btns_normal(self,*buttons):
+        for button in buttons:
+            button.configure(state="normal")
+
     #toggles the buttons state
     def toggle_btn_state(self,*buttons):
         for button in buttons:
@@ -164,25 +242,34 @@ class MyApp():
             else:
                 button.config(state=tk.NORMAL)
 
-
     #destroys anything that is a child of the given frame
     def clear_frame(self,*frames):
         for frame in frames:
             for widgets in frame.winfo_children():
                 widgets.destroy()
 
+    def display_results(self,parent_label,results):
+        for result in (results):
+            if result[1] == True:
+                color = self.hex_green
+            else:
+                color = self.hex_red
+            label = ttk.Label(parent_label,text=result[0],background=color)
+            label.pack(padx=10, pady=10,expand=True,anchor="n")
 
     # list box func, runs on item click
     # gets selected item and adds to two lists
     # one we use and one Tkinter uses to display
     def items_selected(self,event):
-        selected_indices = self.listbox.curselection()[0]#returns a list, you can select multiple
-        selected_item = event.widget.get(self.listbox.curselection()[0])
-        if selected_item in self.selected_coms:
-            (self.selected_coms.remove(selected_item))
-        else:
-            (self.selected_coms.append(selected_item))
-        self.selected_coms_str.set(self.selected_coms)
+        #selected_indices = self.listbox.curselection()[0]#returns a list, you can select multiple
+        try:
+            selected_item = event.widget.get(self.listbox.curselection()[0])
+            if selected_item in self.selected_coms:
+                (self.selected_coms.remove(selected_item))
+            else:
+                (self.selected_coms.append(selected_item))
+            self.selected_coms_str.set(self.selected_coms)
+        except Exception as e: print(e)
 
 
     def is_connection_live(self,com_object):
@@ -190,13 +277,10 @@ class MyApp():
 
     def connect_btn_press(self):
         #change buttons stats, this stops strange behavior on clicking while running
-        self.run_btn.config(state = tk.DISABLED)
-        self.toggle_btn_state(self.connect_device_btn,self.disconnect_device_btn)
-        #check to see if any objects already exist
-        #if no objects then temp list is skipped
-        #need a temp list as need .device attribute of the objects
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        #check to see if any objects already exist,if no objects then temp list is skipped
         self.selected_devices_frame.configure(text="Connecting")
-        temp_obj_list = []
+        temp_obj_list = []#need a temp list as need .device attribute of the objects
         for ob in self.com_objects:
             temp_obj_list.append(ob.device)
         #creates the objects and adds them to com object list , skips dupes
@@ -215,18 +299,12 @@ class MyApp():
                 results.append(x.result())
         self.clear_frame(self.selected_devices_frame)#remove selected devices for results of connection
         # now we iterate through our results, to add to gui object[0] is com port, [1] is true or false
-        for i, object in enumerate(results):
-            color = self.hex_red
-            alive = object[1]
-            if alive ==True:
-                color = self.hex_green
-            my_connection_label = ttk.Label(self.selected_devices_frame,text=object[0],background=color)
-            my_connection_label.pack(ipadx=5, ipady=5,padx=5, pady=5,side="left",expand=True)
+        self.display_results(self.selected_devices_frame,results)
         #re enable buttons and change label frame state
         if any(False in result for result in results) == True or len(results) == 0:
-            self.toggle_btn_state(self.connect_device_btn,self.disconnect_device_btn)
+            self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn)
         else:
-            self.toggle_btn_state(self.connect_device_btn,self.run_btn,self.disconnect_device_btn)
+            self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.selected_devices_frame.configure(text="Selected Devices")
 
     def disconnect_btn_press(self):
@@ -249,12 +327,9 @@ class MyApp():
 
 
     def update_progress_loop(self):
-        #print("hello")
         while self.my_pb_object.progress < (self.my_pb_object.total * 0.95):
             self.progress_bar['value'] = self.my_pb_object.progress
-            #print(f"value{self.my_pb_object.progress}")
             time.sleep(0.1)
-        return
             
 
     def update_progress(self):
@@ -274,7 +349,7 @@ class MyApp():
     def run_btn_press(self):
         #update gui
         self.clear_frame(self.results_frame)
-        self.toggle_btn_state(self.connect_device_btn,self.run_btn,self.disconnect_device_btn)
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.my_pb_object.progress = 0
         self.progress_bar["value"] = 0
         self.results_frame.config(text="Running...")
@@ -284,21 +359,15 @@ class MyApp():
         my_thread.personality_path = self.personality_path
         my_thread.firmware_path = self.firmware_path
         my_thread.my_pb_object = self.my_pb_object
-
         self.update_progress()
+        #end
         results = my_thread.thread_run()
         print(results)
         self.progress_bar['value'] = self.my_pb_object.total
-        for i,result in enumerate(results):
-            if result[1] == True:
-                color = self.hex_green
-            else:
-                color = self.hex_red
-            self.results_placeholder = ttk.Label(self.results_frame,text=result[0],background=color)
-            self.results_placeholder.pack(padx=10, pady=10,expand=True,anchor="n")
+        self.display_results(self.results_frame,results)
 
         self.results_frame.config(text="Results")
-        self.toggle_btn_state(self.connect_device_btn,self.run_btn,self.disconnect_device_btn)
+        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
 
 if __name__ == '__main__':
     format = "%(asctime)s.%(msecs)04d: %(message)s"
