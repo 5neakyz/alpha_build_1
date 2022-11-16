@@ -193,10 +193,10 @@ class MyApp():
 # - Notebook Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def show_more(self):
         if self.notebook.grid_info() == {}:
-            self.root_window.columnconfigure(index=2, weight=3,minsize=400)
-            self.notebook.grid(row=0,column=2,columnspan=3,sticky="nsew", rowspan=3,padx=10,pady=10,)
+            self.root_window.columnconfigure(index=2, weight=2,minsize=400)
+            self.notebook.grid(row=0,column=2,columnspan=2,sticky="nsew", rowspan=3,padx=10,pady=10,)
         else:
-            self.root_window.columnconfigure(index=2, weight=3,minsize=0)
+            self.root_window.columnconfigure(index=2, weight=2,minsize=0)
             self.notebook.grid_forget()
 
     def the_more(self,screen=None):
@@ -208,11 +208,11 @@ class MyApp():
 
             if screen == "config":
                 label = tk.Text(new_pad)
-                label.pack(fill="y")
+                label.pack(fill="y",expand=True)
                 label.insert("end",object.read_config())
             if screen == "status":
                 label = tk.Text(new_pad)
-                label.pack(fill="y")
+                label.pack(fill="y",expand=True)
                 label.insert("end",object.read_status())
             logging.info(" Fetched")
     def get_config_info(self):
