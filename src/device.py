@@ -136,36 +136,31 @@ class Device():
         return status
 
     def read_config(self):
+        out = ""
         for _ in range(5):
             live = self.is_alive()
-            out = ""
             if live == True:
                 self.write_commands(["esc", "3"])
-                x = self.ser.readlines()
-                for item in x:
-                    y = item.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ').replace(b'\x1b[2J\x1b[2J\r',b'').decode("utf-8")
-                    out += y + '\n'
-                break
-            else: return[self.device,"No READ"]
-        return [self.device,out]
+                for _ in range(50):
+                    lines = self.ser.readlines()
+                    if len(lines) > 0:
+                        for line in lines:
+                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                            out +=(y.decode('utf-8')+ ' \n')
+                        return [self.device,out]
+        return [self.device,"No READ"]
 
     def read_status(self):
+        out = ""
         for _ in range(5):
-            print(_)
             live = self.is_alive()
             if live == True:
                 self.write_commands(["esc", "4"])
-                out = ""
-                for _ in range (50):
-                    x = self.ser.readline()
-                    if "Status Screen" in str(x):
-                        for _ in range(30):
-                            x = self.ser.readline()
-                            y = x.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                for _ in range(50):
+                    lines = self.ser.readlines()
+                    if len(lines) > 0:
+                        for line in lines:
+                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
                             out +=(y.decode('utf-8')+ ' \n')
-                        break
-                #print(f"OUT: {out}")
-                break
-            else: return[self.device,"No READ"]
-
-        return [self.device,out]
+                        return [self.device,out]
+        return [self.device,"No READ"]

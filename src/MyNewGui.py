@@ -27,7 +27,7 @@ class MyApp():
         # Make the app responsive
         self.root_window.columnconfigure(index=0, weight=1)
         self.root_window.columnconfigure(index=1, weight=1)
-        self.root_window.columnconfigure(index=2, weight=2)
+        self.root_window.columnconfigure(index=2, weight=1)
         self.root_window.rowconfigure(index=0, weight=1)
         self.root_window.rowconfigure(index=1, weight=1)
         self.root_window.rowconfigure(index=2, weight=1)
@@ -172,7 +172,7 @@ class MyApp():
 # - - - Notebook (work in progress) - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         '''this is dynamically generated see functions below
         '''
-        self.notebook = ttk.Notebook(self.root_window)
+        self.notebook = ttk.Notebook(self.root_window,width=350)
 
         
         #sizegrip
@@ -193,28 +193,36 @@ class MyApp():
 # - Notebook Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def show_more(self):
         if self.notebook.grid_info() == {}:
-            self.root_window.columnconfigure(index=2, weight=2,minsize=400)
-            self.notebook.grid(row=0,column=2,columnspan=2,sticky="nsew", rowspan=3,padx=10,pady=10,)
+            self.root_window.columnconfigure(index=2, weight=1)
+            self.notebook.grid(row=0,column=2,columnspan=1,sticky="nsew", rowspan=3,padx=10,pady=10,)
         else:
-            self.root_window.columnconfigure(index=2, weight=2,minsize=0)
+            self.root_window.columnconfigure(index=2, weight=1,minsize=0)
             self.notebook.grid_forget()
+
+    def read_unit_info(self,device,screen):
+        if screen == "config":
+            return device.read_config()
+        if screen == "status":
+            return device.read_status()
 
     def the_more(self,screen=None):
         self.clear_frame(self.notebook)
-        for object in self.com_objects:
-            logging.info(" Starting")
+        results = []
+        print(self.com_objects)
+        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+            tasks = [executor.submit(self.read_unit_info,device,screen) for device in self.com_objects]
+            for x in concurrent.futures.as_completed(tasks):
+                results.append(x.result())
+        print(results)
+        for result in results:
+            print(result)
             new_pad = ttk.Frame(self.notebook)
-            self.notebook.add(new_pad,text=object.device)
-
-            if screen == "config":
-                label = tk.Text(new_pad)
-                label.pack(fill="y",expand=True)
-                label.insert("end",object.read_config())
-            if screen == "status":
-                label = tk.Text(new_pad)
-                label.pack(fill="y",expand=True)
-                label.insert("end",object.read_status())
+            self.notebook.add(new_pad,text=result[0])
+            label = tk.Text(new_pad)
+            label.pack(fill="both",expand=True)
+            label.insert("end",result[1])
             logging.info(" Fetched")
+            
     def get_config_info(self):
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.the_more("config")
@@ -255,7 +263,7 @@ class MyApp():
             else:
                 color = self.hex_red
             label = ttk.Label(parent_label,text=result[0],background=color)
-            label.pack(padx=10, pady=10,expand=True,anchor="n")
+            label.pack(padx=10, pady=10,expand=True,anchor="n",side="left")
 
     # list box func, runs on item click
     # gets selected item and adds to two lists
