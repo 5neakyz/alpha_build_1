@@ -24,6 +24,8 @@ class MyApp():
         self.root_window.tk.call('source', 'Forest-ttk-theme-master/forest-dark.tcl')
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
+        #i think if a thread is running while closing the window the the object will remained connected
+        self.root_window.protocol("WM_DELETE_WINDOW",self.close_window)
         # Make the app responsive
         self.root_window.columnconfigure(index=0, weight=1)
         self.root_window.columnconfigure(index=1, weight=1)
@@ -366,6 +368,11 @@ class MyApp():
 
         self.results_frame.config(text="Results")
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+
+
+    def close_window(self):
+        self.com_objects.clear()
+        self.root_window.destroy()
 
 if __name__ == '__main__':
     format = "%(asctime)s.%(msecs)04d: %(message)s"
