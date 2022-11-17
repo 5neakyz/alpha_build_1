@@ -67,17 +67,13 @@ class MyApp():
         menubar.add_cascade(menu=menu_file, label='File')
         menubar.add_cascade(menu=menu_window, label='Window')
         menubar.add_cascade(menu=menu_help, label='Help')
-        menubar.add_cascade(menu=menu_more, label='More')
-
+        menubar.add_command(label="More?",command=self.show_more)
+        menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_config_info).start())
+        menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_status_info).start())
     # - File Menu - - - - - - - - - - - - - - - - - - - - - - -
     # - Window Menu - - - - - - - - - - - - - - - - - - - - - -
     # - Help Menu - - - - - - - - - - - - - - - - - - - - - - -
     # - More Menu
-        menu_more.add_command(label="Do you want More?",command=self.show_more)
-        menu_more.add_separator()
-        menu_more.add_separator()
-        menu_more.add_command(label="3: View Config",command=self.get_config_info)
-        menu_more.add_command(label="4: Status Screen",command=self.get_status_info)
 
         self.root_window.config(menu=menubar)
 
@@ -208,21 +204,17 @@ class MyApp():
     def the_more(self,screen=None):
         self.clear_frame(self.notebook)
         results = []
-        print(self.com_objects)
         with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
             tasks = [executor.submit(self.read_unit_info,device,screen) for device in self.com_objects]
             for x in concurrent.futures.as_completed(tasks):
                 results.append(x.result())
-        print(results)
         for result in results:
-            print(result)
             new_pad = ttk.Frame(self.notebook)
             self.notebook.add(new_pad,text=result[0])
             label = tk.Text(new_pad)
             label.pack(fill="both",expand=True)
             label.insert("end",result[1])
-            logging.info(" Fetched")
-            
+
     def get_config_info(self):
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.the_more("config")
