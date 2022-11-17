@@ -21,7 +21,7 @@ class MyApp():
         #self.root_window.geometry("600x600")
         self.root_window.option_add("*tearOff", False) # This is always a good idea
         # Import the tcl file
-        self.root_window.tk.call('source', 'gui_design/Forest-ttk-theme-master/forest-dark.tcl')
+        self.root_window.tk.call('source', 'Forest-ttk-theme-master/forest-dark.tcl')
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
         # Make the app responsive
@@ -59,22 +59,20 @@ class MyApp():
 # - Menus - - - - - - - - - - - - - - - - - - - - - - - -
         menubar = tk.Menu(root)
 
-        menu_file = tk.Menu(menubar, tearoff=0)
-        menu_window =tk. Menu(menubar, tearoff=0)
-        menu_help = tk.Menu(menubar, tearoff=0)
-        menu_more = tk.Menu(menubar, tearoff=0)
+        # menu_file = tk.Menu(menubar, tearoff=0)
+        # menu_window =tk. Menu(menubar, tearoff=0)
+        # menu_help = tk.Menu(menubar, tearoff=0)
 
-        menubar.add_cascade(menu=menu_file, label='File')
-        menubar.add_cascade(menu=menu_window, label='Window')
-        menubar.add_cascade(menu=menu_help, label='Help')
+        # menubar.add_cascade(menu=menu_file, label='File')
+        # menubar.add_cascade(menu=menu_window, label='Window')
+        # menubar.add_cascade(menu=menu_help, label='Help')
+
         menubar.add_command(label="More?",command=self.show_more)
         menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_config_info).start())
         menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_status_info).start())
     # - File Menu - - - - - - - - - - - - - - - - - - - - - - -
     # - Window Menu - - - - - - - - - - - - - - - - - - - - - -
     # - Help Menu - - - - - - - - - - - - - - - - - - - - - - -
-    # - More Menu
-
         self.root_window.config(menu=menubar)
 
 
@@ -373,4 +371,4 @@ if __name__ == '__main__':
     format = "%(asctime)s.%(msecs)04d: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
-    game = MyApp(tk.Tk())
+    app = MyApp(tk.Tk())

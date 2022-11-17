@@ -1,8 +1,7 @@
-from simple_Interface import MyApp
-from tkinter import *
+#from simple_Interface import MyApp
+from MyNewGui import MyApp
+import tkinter as tk
 from tkinter import ttk 
 if __name__ == "__main__":
-    root = Tk()
-    MyApp(root)
-    root.mainloop()
+    app = MyApp(tk.Tk())
     
