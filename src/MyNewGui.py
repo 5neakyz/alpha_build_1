@@ -18,10 +18,12 @@ class MyApp():
 # - - - gui config - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.root_window = root
         self.root_window.title("ML Multi Units")
+        self.root_window.iconbitmap('myicon.ico')
         #self.root_window.geometry("600x600")
         self.root_window.option_add("*tearOff", False) # This is always a good idea
         # Import the tcl file
         self.root_window.tk.call('source', 'Forest-ttk-theme-master/forest-dark.tcl')
+        #self.root_window.tk.call('source', 'src/Forest-ttk-theme-master/forest-dark.tcl')
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
         #i think if a thread is running while closing the window the the object will remained connected
@@ -310,6 +312,7 @@ class MyApp():
     def disconnect_btn_press(self):
         #empty selected coms and update tkinter string
         self.selected_coms.clear()
+        self.com_objects.clear()
         self.selected_coms_str.set(self.selected_coms)
         self.clear_frame(self.selected_devices_frame)
         self.selected_devices_placeholder = ttk.Label(self.selected_devices_frame,textvariable=self.selected_coms_str,wraplength=250)
