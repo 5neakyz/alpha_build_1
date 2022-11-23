@@ -43,8 +43,7 @@ class Device():
 
     def is_config(self):
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 self.write_commands(["esc", "3"])
                 x = self.ser.readlines()
                 if "No Config" in str(x):
@@ -56,8 +55,7 @@ class Device():
     def is_firmware (self):
         vers = None
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 break
         else:
             return False
@@ -68,7 +66,7 @@ class Device():
         #print(vers)
         self.write_commands(["esc", "4"])
         x = self.ser.readlines()
-        if vers == None:
+        if vers is None:
             return False
         else:
             if str(vers) in str(x):
@@ -78,8 +76,7 @@ class Device():
 
     def erase_config(self):
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 self.write_commands(["esc","9","h","y"])
                 time.sleep(0.5)
                 return True
@@ -99,12 +96,12 @@ class Device():
     """
     def push(self,mode=-1):
         if mode == 1:# MODE 1 push personality
-            if self.personality_path == None:
+            if self.personality_path is None:
                 return False
             else:
                 path = self.personality_path
         elif mode == 2:# MODE 2 push Firmware
-            if self.firmware_path == None:
+            if self.firmware_path is None:
                 return False
             else:
                 path = self.firmware_path
@@ -112,8 +109,7 @@ class Device():
             return False
 
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 break
         else:
             return False
@@ -138,12 +134,11 @@ class Device():
     def read_config(self):
         out = ""
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 self.write_commands(["esc", "3"])
                 for _ in range(50):
                     lines = self.ser.readlines()
-                    if len(lines) > 0:
+                    if lines:
                         for line in lines:
                             y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
                             out +=(y.decode('utf-8')+ ' \n')
@@ -153,12 +148,11 @@ class Device():
     def read_status(self):
         out = ""
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
+            if self.is_alive():
                 self.write_commands(["esc", "4"])
                 for _ in range(50):
                     lines = self.ser.readlines()
-                    if len(lines) > 0:
+                    if lines:
                         for line in lines:
                             y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
                             out +=(y.decode('utf-8')+ ' \n')
