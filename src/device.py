@@ -44,21 +44,24 @@ class Device():
     def is_config(self):
         for _ in range(5):
             if self.is_alive():
-                self.write_commands(["esc", "3"])
-                x = self.ser.readlines()
-                if "No Config" in str(x):
-                    return False
-                else:
-                    return True
-        return False
+                break
+        else: return False
+
+        self.write_commands(["esc", "3"])
+
+        if "No Config" in str(self.ser.readlines()):
+            return False
+        else:
+            return True
+        
 
     def is_firmware (self):
         vers = None
         for _ in range(5):
             if self.is_alive():
                 break
-        else:
-            return False
+        else: return False
+
         try:
             list_of_matches = re.findall("\d\.\d\d\.\d", self.firmware_path)
             vers = list_of_matches[0]
@@ -77,18 +80,14 @@ class Device():
     def erase_config(self):
         for _ in range(5):
             if self.is_alive():
-                self.write_commands(["esc","9","h","y"])
-                time.sleep(0.5)
-                return True
-            return False
-        # self.write_commands(["esc","3"])
-        # data = self.ser.readlines()
-        # time.sleep(0.5)
-        # if "No Config" in str(data):
-        #     self.write_commands(["esc"])
-        #     return True
-        # else:
-        #     return False
+                break
+        else: return False
+
+        self.write_commands(["esc","9","h","y"])
+        time.sleep(0.5)
+        return True
+    
+
     """
     MODES should probs change this
     1 - Push Personality
@@ -96,23 +95,18 @@ class Device():
     """
     def push(self,mode=-1):
         if mode == 1:# MODE 1 push personality
-            if self.personality_path is None:
-                return False
-            else:
-                path = self.personality_path
+            if self.personality_path is None: return False
+            else: path = self.personality_path
         elif mode == 2:# MODE 2 push Firmware
-            if self.firmware_path is None:
-                return False
-            else:
-                path = self.firmware_path
-        else:
-            return False
+            if self.firmware_path is None: return False
+            else: path = self.firmware_path
+        else: return False
 
         for _ in range(5):
             if self.is_alive():
                 break
-        else:
-            return False
+        else: return False
+        
         #xmodem setup
         def getc(size, timeout=1):
             return self.ser.read(size) or None
@@ -134,27 +128,37 @@ class Device():
     def read_config(self):
         out = ""
         for _ in range(5):
-            if self.is_alive():
-                self.write_commands(["esc", "3"])
-                for _ in range(50):
-                    lines = self.ser.readlines()
-                    if lines:
-                        for line in lines:
-                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                            out +=(y.decode('utf-8')+ ' \n')
-                        return [self.device,out]
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "3"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+
+            if not lines: continue
+
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                out +=(y.decode('utf-8')+ ' \n')
+                return [self.device,out]
+            
         return [self.device,"No READ"]
 
     def read_status(self):
         out = ""
         for _ in range(5):
-            if self.is_alive():
-                self.write_commands(["esc", "4"])
-                for _ in range(50):
-                    lines = self.ser.readlines()
-                    if lines:
-                        for line in lines:
-                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                            out +=(y.decode('utf-8')+ ' \n')
-                        return [self.device,out]
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "4"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+
+            if not lines: continue
+
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                out +=(y.decode('utf-8')+ ' \n')
+                return [self.device,out]
+                
         return [self.device,"No READ"]
