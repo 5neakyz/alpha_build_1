@@ -88,6 +88,18 @@ class Device():
         return True
     
 
+    #xmodem setup
+    def getc(self,size, timeout=1):
+        gbytes = self.ser.read(size)
+        print(f"G_Bytes: {gbytes}")
+        return gbytes or None
+    
+    def putc(self,data, timeout=1):
+        self.pb_object.add_to_progress(1028)
+        pbytes = self.ser.write(data)
+        time.sleep(0.1) # have to wait otherwise it reads nothing
+        print(f"P_Bytes: {data}")
+        return  pbytes or None 
     """
     MODES should probs change this
     1 - Push Personality
@@ -107,14 +119,8 @@ class Device():
                 break
         else: return False
         
-        #xmodem setup
-        def getc(size, timeout=1):
-            return self.ser.read(size) or None
-        def putc(data, timeout=1):
-            self.pb_object.add_to_progress(128)
-            #print(f"{self.pb_object.progress}/{self.pb_object.total}")
-            return self.ser.write(data)  # note that this ignores the timeout
-        modem = XMODEM(getc, putc)#modes = xmodem , xmodem1k , xmodemcrc
+        
+        modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
         stream = open(path, 'rb')
 
         self.write_commands(["esc","6"])
@@ -134,13 +140,12 @@ class Device():
         self.write_commands(["esc", "3"])
         for _ in range(50):
             lines = self.ser.readlines()
-
-            if not lines: continue
+            if not lines:continue
 
             for line in lines:
                 y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
                 out +=(y.decode('utf-8')+ ' \n')
-                return [self.device,out]
+            return [self.device,out]
             
         return [self.device,"No READ"]
 
@@ -159,6 +164,6 @@ class Device():
             for line in lines:
                 y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
                 out +=(y.decode('utf-8')+ ' \n')
-                return [self.device,out]
+            return [self.device,out]
                 
         return [self.device,"No READ"]
