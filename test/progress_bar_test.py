@@ -6,7 +6,19 @@ import os
 
 
 
+import dataclasses
 
+@dataclasses.dataclass
+class pb_data():
+    """
+    Data structure to hold the progress bar data.
+    """
+    progress: int = 0
+    total: int = 0
+
+    def add_to_progress(self, value):
+        self.progress += value
+        return self.progress
 
 class MonApp(Tk):
     def __init__(self):
@@ -32,22 +44,15 @@ class MonApp(Tk):
         threading.Thread(target=real_traitement).start()
 
 
+
+
+
 if __name__ == '__main__':
     # app = MonApp()
     # app.mainloop()
     # file_name = "J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.88.0_c741.bin"
     # file_stats = os.stat(file_name).st_size
     # print(file_stats)
-    def func():
-        for _ in range(5):
-            print(_)
-            if _ == 3:
-                print("breaking")
-                break
-        else:
-            print("else")
-            return False
-        print("outside")
-        return True
 
-    print(func())
+    PB = pb_data()
+    print(PB.total)

@@ -95,8 +95,8 @@ class Device():
         return gbytes or None
     
     def putc(self,data, timeout=1):
-        self.pb_object.add_to_progress(1028)
         pbytes = self.ser.write(data)
+        self.pb_object.add_to_progress(1028)
         time.sleep(0.1) # have to wait otherwise it reads nothing
         print(f"P_Bytes: {data}")
         return  pbytes or None 

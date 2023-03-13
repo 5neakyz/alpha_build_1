@@ -1,17 +1,10 @@
 
 
-mylist = ["a","","a","","","a","","","","a","a","a","","","","a","a"]
+def func():
+    return False
 
 
+if func():
+    print("Hello")
 
-
-def func(mylist):
-    for item in mylist:
-        if item:
-            continue
-
-        print(item)
-
-
-
-print(func(mylist))
+print(func())
