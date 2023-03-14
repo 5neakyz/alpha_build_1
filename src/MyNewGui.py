@@ -83,8 +83,7 @@ class MyApp():
 
         menu_settings.add_command(label="Toggle Info",command=self.toggle_unit_info_display)
         menu_settings.add_command(label="baudrate")
-        url = 'https://github.com/5neakyz/Multi-ML-1.0'
-        menu_settings.add_command(label="Github")
+        menu_settings.add_command(label="Github",command=lambda: threading.Thread(target=self.open_github('https://github.com/5neakyz/Multi-ML-1.0')).start())
 
 
         self.root_window.config(menu=menubar)
@@ -398,6 +397,9 @@ class MyApp():
         self.progress_bar['maximum'] = self.my_pb_object.total
 
         threading.Thread(target=self.update_progress_loop).start()#thread will auto close on completion
+
+    def open_github(self,url):
+        webbrowser.open(url)
 
     def close_window(self):
         self.com_objects.clear()
