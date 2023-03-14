@@ -59,6 +59,8 @@ class MyApp():
         self.hex_red = '#b40d1b'
         self.hex_green = '#217346'
 
+        self.are_com_objects_usable = False
+
 
 # - Menus - - - - - - - - - - - - - - - - - - - - - - - -
         menubar = tk.Menu(root)
@@ -72,8 +74,8 @@ class MyApp():
         # menubar.add_cascade(menu=menu_help, label='Help')
 
         menubar.add_command(label="More?",command=self.show_more)
-        menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_config_info).start())
-        menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_status_info).start())
+        menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_unit_info("config")).start())
+        menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_unit_info("status")).start())
 
         self.root_window.config(menu=menubar)
 
@@ -216,20 +218,15 @@ class MyApp():
             label.pack(fill="both",expand=True)
             label.insert("end",result[1])
 
-    def get_config_info(self):
-        if not self.com_objects:
+    def get_unit_info(self,mode="config"):
+        if not self.com_objects or not self.are_com_objects_usable:
+            self.clear_frame(self.notebook)
             return
-        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        self.the_more("config")
-        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
 
-    def get_status_info(self):
-        if not self.com_objects:
-            return
-        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        self.the_more("status")
-        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
 
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        self.the_more(mode)
+        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
 
     def set_btns_disabled(self,*buttons):
         for button in buttons:
@@ -308,8 +305,10 @@ class MyApp():
         #re enable buttons and change label frame state
         if any(False in result for result in results) == True or len(results) == 0:
             self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn)
+            self.are_com_objects_usable = False
         else:
             self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+            self.are_com_objects_usable = True
         self.selected_devices_frame.configure(text="Selected Devices")
 
     def disconnect_btn_press(self):
