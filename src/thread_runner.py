@@ -35,7 +35,7 @@ class ThreadRunner():
 
 
     def erase_config(self,obj):
-        if obj.erase_config() == True and obj.is_config() == False:#we dont want a config # this overkill/ duplicate
+        if obj.erase_config() == True and obj.is_config() == False:
             return [obj.device , True]
         else:
             return [obj.device,False]
