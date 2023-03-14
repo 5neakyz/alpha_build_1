@@ -375,7 +375,9 @@ class MyApp():
 
         self.results_frame.config(text="Results")
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-
+        #force update progress bar. it works poorly when just eraseing or just pushing personaility 
+        self.progress_bar['maximum'] = 100
+        self.progress_bar["value"] = 100
 
     def close_window(self):
         self.com_objects.clear()
