@@ -71,10 +71,6 @@ class ThreadRunner():
                 return [obj.device , True]
             time.sleep(0.5)
         else: return [obj.device,False]
-        #not checking firmware for now as this is dependent on file names being all similar when i regex split to get vers
-        #if obj.is_firmware():
-        #    return [obj.device , True]
-        #return [obj.device,False]
 
 
     def push_both(self,obj):

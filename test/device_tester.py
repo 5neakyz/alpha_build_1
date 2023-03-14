@@ -57,17 +57,34 @@ class Device():
     def read_config(self):
         out = ""
         for _ in range(5):
-            live = self.is_alive()
-            if live == True:
-                self.write_commands(["esc", "3"])
-                for _ in range(50):
-                    lines = self.ser.readlines()
-                    if len(lines) > 0:
-                        for line in lines:
-                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                            out +=(y.decode('utf-8'))
-                        return [self.device,out]
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "3"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+            if not lines:continue
+
+            print(f"LINES :\n{lines}")
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                #out +=(y.decode('utf-8')+ ' \n') 
+                print(y)
+            return [self.device,"out"]
+            
         return [self.device,"No READ"]
+
+    def read_config_lines(self):
+            out = ""
+            for _ in range(5):
+                if self.is_alive(): break
+            else: return False
+
+            self.write_commands(["esc", "3"])
+
+            lines = self.ser.readlines
+
+    
     """
     MODES should probs change this
     1 - Push Personality
@@ -135,8 +152,8 @@ if __name__ == '__main__':
     #myunit.firmware_path="J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.84.0_b981.bin"
     myunit.personality_path="J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_CT_Microl_DAFCF_040619.txt"
     logging.info(f"DEVICE STATUS IsAlive: {myunit.is_alive()}")
-    logging.info(f"Clear CONFIG : {myunit.erase_config()}")
-    logging.info(f"CONFIG : {myunit.read_config()}")
-    #logging.info(f"push firm : {myunit.push(2)}")
-    logging.info(f"push pers : {myunit.push(1)}")
+    # logging.info(f"Clear CONFIG : {myunit.erase_config()}")
+    logging.info(f"CONFIG : {myunit.read_config()[1]}")
+    # logging.info(f"push firm : {myunit.push(2)}")
+    # logging.info(f"push pers : {myunit.push(1)}")
     #logging.info(f"CONFIG : {myunit.read_config()}")

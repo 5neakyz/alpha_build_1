@@ -41,6 +41,7 @@ class Device():
         else:
             return False
 
+    # if there is a config file: True , if empty: False
     def is_config(self):
         for _ in range(5):
             if self.is_alive():
@@ -77,6 +78,7 @@ class Device():
             else:
                 return True
 
+    # does not check if config was successfully removed
     def erase_config(self):
         for _ in range(5):
             if self.is_alive():
@@ -100,6 +102,7 @@ class Device():
         time.sleep(0.1) # have to wait otherwise it reads nothing
         print(f"P_Bytes: {data}")
         return  pbytes or None 
+    
     """
     MODES should probs change this
     1 - Push Personality
@@ -130,6 +133,7 @@ class Device():
         status = modem.send(stream)
         #print(status)
         return status
+
 
     def read_config(self):
         out = ""

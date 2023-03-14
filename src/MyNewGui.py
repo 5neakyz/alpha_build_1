@@ -74,9 +74,7 @@ class MyApp():
         menubar.add_command(label="More?",command=self.show_more)
         menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_config_info).start())
         menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_status_info).start())
-    # - File Menu - - - - - - - - - - - - - - - - - - - - - - -
-    # - Window Menu - - - - - - - - - - - - - - - - - - - - - -
-    # - Help Menu - - - - - - - - - - - - - - - - - - - - - - -
+
         self.root_window.config(menu=menubar)
 
 
@@ -198,6 +196,7 @@ class MyApp():
             self.notebook.grid_forget()
 
     def read_unit_info(self,device,screen):
+
         if screen == "config":
             return device.read_config()
         if screen == "status":
@@ -218,11 +217,15 @@ class MyApp():
             label.insert("end",result[1])
 
     def get_config_info(self):
+        if not self.com_objects:
+            return
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.the_more("config")
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
 
     def get_status_info(self):
+        if not self.com_objects:
+            return
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.the_more("status")
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
@@ -315,6 +318,7 @@ class MyApp():
         self.com_objects.clear()
         self.selected_coms_str.set(self.selected_coms)
         self.clear_frame(self.selected_devices_frame)
+        self.set_btns_disabled(self.run_btn)
         self.selected_devices_placeholder = ttk.Label(self.selected_devices_frame,textvariable=self.selected_coms_str,wraplength=250)
         self.selected_devices_placeholder.pack(padx=10, pady=10)
 
