@@ -6,6 +6,7 @@ import serial.tools.list_ports
 import time
 import os
 import sys
+import webbrowser
 import threading
 import logging
 import concurrent.futures
@@ -68,17 +69,23 @@ class MyApp():
 # - Menus - - - - - - - - - - - - - - - - - - - - - - - -
         menubar = tk.Menu(root)
 
-        # menu_file = tk.Menu(menubar, tearoff=0)
+        menu_settings = tk.Menu(menubar, tearoff=0)
         # menu_window =tk. Menu(menubar, tearoff=0)
         # menu_help = tk.Menu(menubar, tearoff=0)
 
-        # menubar.add_cascade(menu=menu_file, label='File')
+        menubar.add_cascade(menu=menu_settings, label='Settings')
         # menubar.add_cascade(menu=menu_window, label='Window')
         # menubar.add_cascade(menu=menu_help, label='Help')
 
-        menubar.add_command(label="More?",command=self.toggle_unit_info_display)
+        #menubar.add_command(label="More?",command=self.toggle_unit_info_display)
         menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_unit_info("config")).start())
         menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_unit_info("status")).start())
+
+        menu_settings.add_command(label="Toggle Info",command=self.toggle_unit_info_display)
+        menu_settings.add_command(label="baudrate")
+        url = 'https://github.com/5neakyz/Multi-ML-1.0'
+        menu_settings.add_command(label="Github")
+
 
         self.root_window.config(menu=menubar)
 
@@ -174,8 +181,7 @@ class MyApp():
         '''this is dynamically generated see functions below
         '''
         self.notebook = ttk.Notebook(self.root_window,width=350)
-
-        
+        self.notebook.grid(row=0,column=2,columnspan=1,sticky="nsew", rowspan=3,padx=10,pady=10,)
         #sizegrip
         sizegrip = ttk.Sizegrip(self.root_window)
         sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
@@ -189,32 +195,29 @@ class MyApp():
         
         self.root_window.mainloop()
 
-    
-# - MORE MENU
+
 # - Notebook (unit info) Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     def toggle_unit_info_display(self):
         if self.notebook.grid_info() == {}:
             self.root_window.columnconfigure(index=2, weight=1)
             self.notebook.grid(row=0,column=2,columnspan=1,sticky="nsew", rowspan=3,padx=10,pady=10,)
         else:
-            self.root_window.columnconfigure(index=2, weight=1,minsize=0)
+            self.root_window.columnconfigure(index=2, weight=0,minsize=0)
             self.notebook.grid_forget()
 
-    def read_unit_info(self,device,screen):
-
-        if screen == "config":
+    def read_unit_info(self,device):
+        if self.unit_info_option == "config":
             return device.read_config()
-        if screen == "status":
+        if self.unit_info_option == "status":
             return device.read_status()
+        return False
 
-    def populate_unit_info(self,screen=None):
+    def populate_unit_info(self,mode=None):
         self.clear_child_in_frame(self.notebook)
-        results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-            tasks = [executor.submit(self.read_unit_info,device,screen) for device in self.com_objects]
-            for x in concurrent.futures.as_completed(tasks):
-                results.append(x.result())
-        for result in results:
+        self.unit_info_option = mode
+        #spawns threadpool to check all units at once , costly startup time
+        results = self.create_threadpool(self.read_unit_info,self.com_objects)
+        for result in results: # populates display
             new_pad = ttk.Frame(self.notebook)
             self.notebook.add(new_pad,text=result[0])
             label = tk.Text(new_pad)
@@ -225,8 +228,6 @@ class MyApp():
         if not self.com_objects or not self.are_com_objects_usable:
             self.clear_child_in_frame(self.notebook)
             return
-
-
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
         self.populate_unit_info(mode)
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
@@ -247,10 +248,9 @@ class MyApp():
         except Exception as e: print(e)
 
     def connect_btn_press(self):
-        #change buttons states, this stops strange behavior on clicking while running
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        #check to see if any objects already exist,if no objects then temp list is skipped
         self.selected_devices_frame.configure(text="Connecting")
+        #check to see if any objects already exist,if no objects then temp list is skipped
         temp_obj_list = []#need a temp list as need .device attribute of the objects
         for ob in self.com_objects:
             temp_obj_list.append(ob.device)
@@ -260,14 +260,14 @@ class MyApp():
                 self.com_objects.append(Device(device))
         #list comprehension is needed to remove objects of COMs that are no longer selected
         self.com_objects = [x for x in self.com_objects if x.device in self.selected_coms]
+
         '''using concurrent threading to check if we can connect to units being able to connect is being able to read the main menu
         it will fail if we cant even establish a serial connection this does mean that if, say a units voltage is too low it will count as fail
         but will not given reasons why '''
-        results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-            tasks = [executor.submit(self.is_connection_live,device) for device in self.com_objects]
-            for x in concurrent.futures.as_completed(tasks):
-                results.append(x.result())
+
+        results = self.create_threadpool(self.is_connection_live,self.com_objects)
+
+        #display
         self.clear_child_in_frame(self.selected_devices_frame)#remove selected devices for results of connection
         # now we iterate through our results, to add to gui object[0] is com port, [1] is true or false
         self.display_results(self.selected_devices_frame,results)
@@ -304,8 +304,8 @@ class MyApp():
         my_thread.firmware_path = self.firmware_path
         my_thread.my_pb_object = self.my_pb_object
         self.update_progress()
-        #end
         results = my_thread.thread_run()
+        #end
         print(results)
         self.progress_bar['value'] = self.my_pb_object.total
         self.display_results(self.results_frame,results)
@@ -317,6 +317,15 @@ class MyApp():
         self.progress_bar["value"] = 100
 
 # - FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    def create_threadpool(self,function,items):
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+            tasks = [executor.submit(function,item) for item in items]
+            for x in concurrent.futures.as_completed(tasks):
+                results.append(x.result())
+        return results
+
+
     def resource_path(self,relative_path):
         """ Get absolute path to resource, works for dev and for PyInstaller """
         base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
