@@ -5,6 +5,8 @@ from tkinter import filedialog as fd
 import serial.tools.list_ports
 import time
 import os
+import sys
+import webbrowser
 import threading
 import logging
 import concurrent.futures
@@ -18,12 +20,14 @@ class MyApp():
 # - - - gui config - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.root_window = root
         self.root_window.title("ML Multi Units")
-        #self.root_window.iconbitmap('myicon.ico')
+        icon_path = self.resource_path("assests/myicon.ico")
+        self.root_window.iconbitmap(icon_path)
         #self.root_window.geometry("600x600")
         self.root_window.option_add("*tearOff", False) # This is always a good idea
         # Import the tcl file
         #self.root_window.tk.call('source', 'Forest-ttk-theme-master/forest-dark.tcl')
-        self.root_window.tk.call('source', 'src/Forest-ttk-theme-master/forest-dark.tcl')
+        style_path = self.resource_path('assests/Forest-ttk-theme-master/forest-dark.tcl')
+        self.root_window.tk.call('source', style_path)
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
         #i think if a thread is running while closing the window the the object will remained connected
@@ -59,24 +63,29 @@ class MyApp():
         self.hex_red = '#b40d1b'
         self.hex_green = '#217346'
 
+        self.are_com_objects_usable = False
+
 
 # - Menus - - - - - - - - - - - - - - - - - - - - - - - -
         menubar = tk.Menu(root)
 
-        # menu_file = tk.Menu(menubar, tearoff=0)
+        menu_settings = tk.Menu(menubar, tearoff=0)
         # menu_window =tk. Menu(menubar, tearoff=0)
         # menu_help = tk.Menu(menubar, tearoff=0)
 
-        # menubar.add_cascade(menu=menu_file, label='File')
+        menubar.add_cascade(menu=menu_settings, label='Settings')
         # menubar.add_cascade(menu=menu_window, label='Window')
         # menubar.add_cascade(menu=menu_help, label='Help')
 
-        menubar.add_command(label="More?",command=self.show_more)
-        menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_config_info).start())
-        menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_status_info).start())
-    # - File Menu - - - - - - - - - - - - - - - - - - - - - - -
-    # - Window Menu - - - - - - - - - - - - - - - - - - - - - -
-    # - Help Menu - - - - - - - - - - - - - - - - - - - - - - -
+        #menubar.add_command(label="More?",command=self.toggle_unit_info_display)
+        menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_unit_info("config")).start())
+        menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_unit_info("status")).start())
+
+        menu_settings.add_command(label="Toggle Info",command=self.toggle_unit_info_display)
+        menu_settings.add_command(label="baudrate")
+        menu_settings.add_command(label="Github",command=lambda: threading.Thread(target=self.open_github('https://github.com/5neakyz/Multi-ML-1.0')).start())
+
+
         self.root_window.config(menu=menubar)
 
 
@@ -167,12 +176,11 @@ class MyApp():
         self.run_btn = ttk.Button(self.run_frame,text="Run",state="disabled",command=lambda: threading.Thread(target=self.run_btn_press).start())
         self.run_btn.pack(padx=10, pady=10,expand=True,anchor="sw",side="left")
 
-# - - - Notebook (work in progress) - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - Notebook (unit info)(work in progress) - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         '''this is dynamically generated see functions below
         '''
         self.notebook = ttk.Notebook(self.root_window,width=350)
-
-        
+        self.notebook.grid(row=0,column=2,columnspan=1,sticky="nsew", rowspan=3,padx=10,pady=10,)
         #sizegrip
         sizegrip = ttk.Sizegrip(self.root_window)
         sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
@@ -186,78 +194,43 @@ class MyApp():
         
         self.root_window.mainloop()
 
-# - FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - MORE MENU
-# - Notebook Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    def show_more(self):
+
+# - Notebook (unit info) Functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    def toggle_unit_info_display(self):
         if self.notebook.grid_info() == {}:
             self.root_window.columnconfigure(index=2, weight=1)
             self.notebook.grid(row=0,column=2,columnspan=1,sticky="nsew", rowspan=3,padx=10,pady=10,)
         else:
-            self.root_window.columnconfigure(index=2, weight=1,minsize=0)
+            self.root_window.columnconfigure(index=2, weight=0,minsize=0)
             self.notebook.grid_forget()
 
-    def read_unit_info(self,device,screen):
-        if screen == "config":
+    def read_unit_info(self,device):
+        if self.unit_info_option == "config":
             return device.read_config()
-        if screen == "status":
+        if self.unit_info_option == "status":
             return device.read_status()
+        return False
 
-    def the_more(self,screen=None):
-        self.clear_frame(self.notebook)
-        results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-            tasks = [executor.submit(self.read_unit_info,device,screen) for device in self.com_objects]
-            for x in concurrent.futures.as_completed(tasks):
-                results.append(x.result())
-        for result in results:
+    def populate_unit_info(self,mode=None):
+        self.clear_child_in_frame(self.notebook)
+        self.unit_info_option = mode
+        #spawns threadpool to check all units at once , costly startup time
+        results = self.create_threadpool(self.read_unit_info,self.com_objects)
+        for result in results: # populates display
             new_pad = ttk.Frame(self.notebook)
             self.notebook.add(new_pad,text=result[0])
             label = tk.Text(new_pad)
             label.pack(fill="both",expand=True)
             label.insert("end",result[1])
 
-    def get_config_info(self):
+    def get_unit_info(self,mode="config"):
+        if not self.com_objects or not self.are_com_objects_usable:
+            self.clear_child_in_frame(self.notebook)
+            return
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        self.the_more("config")
+        self.populate_unit_info(mode)
         self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-
-    def get_status_info(self):
-        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        self.the_more("status")
-        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-
-
-    def set_btns_disabled(self,*buttons):
-        for button in buttons:
-            button.configure(state="disabled")
-
-    def set_btns_normal(self,*buttons):
-        for button in buttons:
-            button.configure(state="normal")
-
-    #toggles the buttons state
-    def toggle_btn_state(self,*buttons):
-        for button in buttons:
-            if str(button['state']) == 'normal':
-                button.config(state=tk.DISABLED)
-            else:
-                button.config(state=tk.NORMAL)
-
-    #destroys anything that is a child of the given frame
-    def clear_frame(self,*frames):
-        for frame in frames:
-            for widgets in frame.winfo_children():
-                widgets.destroy()
-
-    def display_results(self,parent_label,results):
-        for result in (results):
-            if result[1] == True:
-                color = self.hex_green
-            else:
-                color = self.hex_red
-            label = ttk.Label(parent_label,text=result[0],background=color)
-            label.pack(padx=10, pady=10,expand=True,anchor="n",side="left")
+# - BUTTON PRESSES - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
     # list box func, runs on item click
     # gets selected item and adds to two lists
@@ -273,15 +246,10 @@ class MyApp():
             self.selected_coms_str.set(self.selected_coms)
         except Exception as e: print(e)
 
-
-    def is_connection_live(self,com_object):
-        return com_object.device,com_object.is_alive()
-
     def connect_btn_press(self):
-        #change buttons stats, this stops strange behavior on clicking while running
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        #check to see if any objects already exist,if no objects then temp list is skipped
         self.selected_devices_frame.configure(text="Connecting")
+        #check to see if any objects already exist,if no objects then temp list is skipped
         temp_obj_list = []#need a temp list as need .device attribute of the objects
         for ob in self.com_objects:
             temp_obj_list.append(ob.device)
@@ -291,22 +259,24 @@ class MyApp():
                 self.com_objects.append(Device(device))
         #list comprehension is needed to remove objects of COMs that are no longer selected
         self.com_objects = [x for x in self.com_objects if x.device in self.selected_coms]
+
         '''using concurrent threading to check if we can connect to units being able to connect is being able to read the main menu
         it will fail if we cant even establish a serial connection this does mean that if, say a units voltage is too low it will count as fail
         but will not given reasons why '''
-        results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-            tasks = [executor.submit(self.is_connection_live,device) for device in self.com_objects]
-            for x in concurrent.futures.as_completed(tasks):
-                results.append(x.result())
-        self.clear_frame(self.selected_devices_frame)#remove selected devices for results of connection
+
+        results = self.create_threadpool(self.is_connection_live,self.com_objects)
+
+        #display
+        self.clear_child_in_frame(self.selected_devices_frame)#remove selected devices for results of connection
         # now we iterate through our results, to add to gui object[0] is com port, [1] is true or false
         self.display_results(self.selected_devices_frame,results)
         #re enable buttons and change label frame state
         if any(False in result for result in results) == True or len(results) == 0:
             self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn)
+            self.are_com_objects_usable = False
         else:
             self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+            self.are_com_objects_usable = True
         self.selected_devices_frame.configure(text="Selected Devices")
 
     def disconnect_btn_press(self):
@@ -314,9 +284,88 @@ class MyApp():
         self.selected_coms.clear()
         self.com_objects.clear()
         self.selected_coms_str.set(self.selected_coms)
-        self.clear_frame(self.selected_devices_frame)
+        self.clear_child_in_frame(self.selected_devices_frame)
+        self.set_btns_disabled(self.run_btn)
         self.selected_devices_placeholder = ttk.Label(self.selected_devices_frame,textvariable=self.selected_coms_str,wraplength=250)
         self.selected_devices_placeholder.pack(padx=10, pady=10)
+
+    def run_btn_press(self):
+        #update gui
+        self.clear_child_in_frame(self.results_frame)
+        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        self.my_pb_object.progress = 0
+        self.progress_bar["value"] = 0
+        self.results_frame.config(text="Running...")
+        #start
+        my_thread = ThreadRunner(self.com_objects)
+        my_thread.mode = self.radio_option.get()#radio button list values
+        my_thread.personality_path = self.personality_path
+        my_thread.firmware_path = self.firmware_path
+        my_thread.my_pb_object = self.my_pb_object
+        self.update_progress()
+        results = my_thread.thread_run()
+        #end
+        print(results)
+        self.progress_bar['value'] = self.my_pb_object.total
+        self.display_results(self.results_frame,results)
+
+        self.results_frame.config(text="Results")
+        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        #force update progress bar. it works poorly when just eraseing or just pushing personaility 
+        self.progress_bar['maximum'] = 100
+        self.progress_bar["value"] = 100
+
+# - FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    def create_threadpool(self,function,items):
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+            tasks = [executor.submit(function,item) for item in items]
+            for x in concurrent.futures.as_completed(tasks):
+                results.append(x.result())
+        return results
+
+
+    def resource_path(self,relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
+
+    def set_btns_disabled(self,*buttons):
+        for button in buttons:
+            button.configure(state="disabled")
+
+    def set_btns_normal(self,*buttons):
+        for button in buttons:
+            button.configure(state="normal")
+
+    def toggle_btn_state(self,*buttons):
+        for button in buttons:
+            if str(button['state']) == 'normal':
+                button.config(state=tk.DISABLED)
+            else:
+                button.config(state=tk.NORMAL)
+
+    #destroys anything that is a child of the given frame
+    def clear_child_in_frame(self,*frames):
+        for frame in frames:
+            for widgets in frame.winfo_children():
+                widgets.destroy()
+
+    def display_results(self,parent_label,results):
+    # Result[0] (string) = COM PORT
+    # Result[1] (bool)= outcome
+        for result in (results):
+            if result[1] == True:
+                color = self.hex_green
+            else:
+                color = self.hex_red
+            label = ttk.Label(parent_label,text=result[0],background=color)
+            label.pack(padx=10, pady=10,expand=True,anchor="n",side="left")
+
+
+    def is_connection_live(self,com_object):
+        return com_object.device,com_object.is_alive()
+
 
     def get_personality_path(self):
         pPath = fd.askopenfilename()
@@ -349,29 +398,8 @@ class MyApp():
 
         threading.Thread(target=self.update_progress_loop).start()#thread will auto close on completion
 
-    def run_btn_press(self):
-        #update gui
-        self.clear_frame(self.results_frame)
-        self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        self.my_pb_object.progress = 0
-        self.progress_bar["value"] = 0
-        self.results_frame.config(text="Running...")
-        #start
-        my_thread = ThreadRunner(self.com_objects)
-        my_thread.mode = self.radio_option.get()#radio button list values
-        my_thread.personality_path = self.personality_path
-        my_thread.firmware_path = self.firmware_path
-        my_thread.my_pb_object = self.my_pb_object
-        self.update_progress()
-        #end
-        results = my_thread.thread_run()
-        print(results)
-        self.progress_bar['value'] = self.my_pb_object.total
-        self.display_results(self.results_frame,results)
-
-        self.results_frame.config(text="Results")
-        self.set_btns_normal(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-
+    def open_github(self,url):
+        webbrowser.open(url)
 
     def close_window(self):
         self.com_objects.clear()

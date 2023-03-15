@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1 id="documentation">Documentation</h1>
+    <h2 id="quick-fire-guide">Quick Fire Guide</h2>
+    <blockquote>
+      <p>
+        Select the com ports of the devices you need, you can unselect by
+        clicking them again
+      </p>
+      <p>
+        Then press the connect button - wait for all Coms to to be displayed
+        under the connect button
+      </p>
+      <ul>
+        <li>Green - ML is alive and talking</li>
+        <li>Red - Cannot talk to ML</li>
+      </ul>
+      <p>
+        You need to unselect any that return RED and press the connect button
+        again
+      </p>
+      <p>Now you can select the option you whish to run on the ML</p>
+      <p>
+        You then click the select firmware / personality can pick what you need.
+        <em
+          >If you are only pushing firmware you only need to select
+          firmware.</em
+        >
+      </p>
+      <p>
+        Once all the Ports are green the run command will now be active and you
+        can press the button
+      </p>
+      <p>
+        You will see the &quot;Running...&quot; label above the button to
+        indicate that it is indeed doing something
+      </p>
+      <p>
+        once the command is done below the button will return if the command was
+        successful for each port.
+      </p>
+      <ul>
+        <li>Green being successful</li>
+        <li>Red being unsuccessful</li>
+      </ul>
+    </blockquote>
+    <h2 id="ins-and-outs">INs and OUTs</h2>
+    <blockquote>
+      <p>The selection box returns all the ports on the PC</p>
+      <p>
+        when pressing connect the COMs will return at different points, if they
+        fail and return red this usually takes a noticeable amount of time, this
+        is because i try multiple times to get to the menu over a few seconds
+      </p>
+      <p>
+        please note that if it returns red this could be from a number of
+        reasons, for example the ML might be on but with low voltage, i
+        currently do not check for this, and so because i cannot get to the main
+        menu when its talking with &quot;to low voltage&quot; i take that as a
+        fail
+      </p>
+      <p>
+        if you do not select a file but try to push firmware or personality
+        nothing will happen, my code catch's that there is no file and will very
+        quickly return this as red
+      </p>
+      <p>
+        also note that pushing firmware takes about 70-80 seconds, but once its
+        pushed it then takes the ML 10-15 seconds to install, and this locks the
+        ML up now i currently wait 20 seconds then about every second for 5
+        seconds do i try to get back to main menu to then push personality, if
+        the ML takes too long it might return as a fail but the firmware will
+        have been pushed but the personality will not have,
+      </p>
+      <p>
+        I do check personality and firmware, ie i check that the xmodem push is
+        successful then for personality, I check thats its not empty &quot;No
+        Config&quot; and for firmware i get the Version from the file name and
+        look at that in the status screen, please note that if the file naming
+        convention changes then its might not read correctly and will fail at
+        this point
+      </p>
+      <p>when pushing firmware I first clear personality</p>
+    </blockquote>
+  </body>
+</html>

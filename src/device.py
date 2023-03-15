@@ -41,24 +41,28 @@ class Device():
         else:
             return False
 
+    # if there is a config file: True , if empty: False
     def is_config(self):
         for _ in range(5):
             if self.is_alive():
-                self.write_commands(["esc", "3"])
-                x = self.ser.readlines()
-                if "No Config" in str(x):
-                    return False
-                else:
-                    return True
-        return False
+                break
+        else: return False
+
+        self.write_commands(["esc", "3"])
+
+        if "No Config" in str(self.ser.readlines()):
+            return False
+        else:
+            return True
+        
 
     def is_firmware (self):
         vers = None
         for _ in range(5):
             if self.is_alive():
                 break
-        else:
-            return False
+        else: return False
+
         try:
             list_of_matches = re.findall("\d\.\d\d\.\d", self.firmware_path)
             vers = list_of_matches[0]
@@ -74,21 +78,31 @@ class Device():
             else:
                 return True
 
+    # does not check if config was successfully removed
     def erase_config(self):
         for _ in range(5):
             if self.is_alive():
-                self.write_commands(["esc","9","h","y"])
-                time.sleep(0.5)
-                return True
-            return False
-        # self.write_commands(["esc","3"])
-        # data = self.ser.readlines()
-        # time.sleep(0.5)
-        # if "No Config" in str(data):
-        #     self.write_commands(["esc"])
-        #     return True
-        # else:
-        #     return False
+                break
+        else: return False
+
+        self.write_commands(["esc","9","h","y"])
+        time.sleep(0.5)
+        return True
+    
+
+    #xmodem setup
+    def getc(self,size, timeout=1):
+        gbytes = self.ser.read(size)
+        print(f"G_Bytes: {gbytes}")
+        return gbytes or None
+    
+    def putc(self,data, timeout=1):
+        pbytes = self.ser.write(data)
+        self.pb_object.add_to_progress(1028)
+        time.sleep(0.1) # have to wait otherwise it reads nothing
+        print(f"P_Bytes: {data}")
+        return  pbytes or None 
+    
     """
     MODES should probs change this
     1 - Push Personality
@@ -96,31 +110,20 @@ class Device():
     """
     def push(self,mode=-1):
         if mode == 1:# MODE 1 push personality
-            if self.personality_path is None:
-                return False
-            else:
-                path = self.personality_path
+            if self.personality_path is None: return False
+            else: path = self.personality_path
         elif mode == 2:# MODE 2 push Firmware
-            if self.firmware_path is None:
-                return False
-            else:
-                path = self.firmware_path
-        else:
-            return False
+            if self.firmware_path is None: return False
+            else: path = self.firmware_path
+        else: return False
 
         for _ in range(5):
             if self.is_alive():
                 break
-        else:
-            return False
-        #xmodem setup
-        def getc(size, timeout=1):
-            return self.ser.read(size) or None
-        def putc(data, timeout=1):
-            self.pb_object.add_to_progress(128)
-            #print(f"{self.pb_object.progress}/{self.pb_object.total}")
-            return self.ser.write(data)  # note that this ignores the timeout
-        modem = XMODEM(getc, putc)#modes = xmodem , xmodem1k , xmodemcrc
+        else: return False
+        
+        
+        modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
         stream = open(path, 'rb')
 
         self.write_commands(["esc","6"])
@@ -131,30 +134,40 @@ class Device():
         #print(status)
         return status
 
+
     def read_config(self):
         out = ""
         for _ in range(5):
-            if self.is_alive():
-                self.write_commands(["esc", "3"])
-                for _ in range(50):
-                    lines = self.ser.readlines()
-                    if lines:
-                        for line in lines:
-                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                            out +=(y.decode('utf-8')+ ' \n')
-                        return [self.device,out]
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "3"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+            if not lines:continue
+
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                out +=(y.decode('utf-8')+ ' \n')
+            return [self.device,out]
+            
         return [self.device,"No READ"]
 
     def read_status(self):
         out = ""
         for _ in range(5):
-            if self.is_alive():
-                self.write_commands(["esc", "4"])
-                for _ in range(50):
-                    lines = self.ser.readlines()
-                    if lines:
-                        for line in lines:
-                            y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                            out +=(y.decode('utf-8')+ ' \n')
-                        return [self.device,out]
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "4"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+
+            if not lines: continue
+
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                out +=(y.decode('utf-8')+ ' \n')
+            return [self.device,out]
+                
         return [self.device,"No READ"]
