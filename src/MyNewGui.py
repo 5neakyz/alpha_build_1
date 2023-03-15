@@ -82,7 +82,7 @@ class MyApp():
         menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_unit_info("status")).start())
 
         menu_settings.add_command(label="Toggle Info",command=self.toggle_unit_info_display)
-        menu_settings.add_command(label="baudrate")
+        #menu_settings.add_command(label="baudrate")
         menu_settings.add_command(label="Github",command=lambda: threading.Thread(target=self.open_github('https://github.com/5neakyz/Multi-ML-1.0')).start())
 
 
