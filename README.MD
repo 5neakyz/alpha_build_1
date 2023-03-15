@@ -1,6 +1,7 @@
 ## Basic Info
 
-The Executable file is in the Output Folder, This is the only file you need to run the Multi Stager
+The Executable file is in the Output Folder, This is the only file you need to run the Multi Stager  
+as it onefile it will take a noticable amount of time to boot up
 
 
 The Baudrate is 115200  
