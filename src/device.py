@@ -3,6 +3,7 @@ import serial
 from xmodem import XMODEM
 import time
 import serial.tools.list_ports
+import logging
 
 class Device():
     def __init__(self,device,personality_path=None,firmware_path=None,pb_object=None):# device is string like "COM6"
@@ -92,15 +93,19 @@ class Device():
 
     #xmodem setup
     def getc(self,size, timeout=1):
-        gbytes = self.ser.read(size)
-        print(f"G_Bytes: {gbytes}")
+        for _ in range (20):
+            gbytes = self.ser.read(size)
+            print(f'GByte: {gbytes}')
+            if gbytes:
+                break
+            time.sleep(0.1)
         return gbytes or None
     
     def putc(self,data, timeout=1):
         pbytes = self.ser.write(data)
         self.pb_object.add_to_progress(1028)
-        time.sleep(0.1) # have to wait otherwise it reads nothing
-        print(f"P_Bytes: {data}")
+        #time.sleep(0.1) # have to wait otherwise it reads nothing
+        print(f'PByte: {pbytes}')
         return  pbytes or None 
     
     """
