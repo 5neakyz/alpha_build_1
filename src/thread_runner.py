@@ -64,6 +64,11 @@ class ThreadRunner():
         if not obj.push(2): 
             return [obj.device,False]
         
+
+        obj.install_checker()
+
+        obj.write_commands(["esc"])
+        
         starttime = time.time()
         for _ in range(20):# it takes like 10-14 seconds to install the firmware or 20 ish seconds for ml30s
             print(f"attempt {_} of 20 : total time waited {time.time()-starttime}")
@@ -84,8 +89,6 @@ class ThreadRunner():
             return [obj.device,False]
         
         return [obj.device,True]
-
-
 
     def thread_run(self):
         results = []

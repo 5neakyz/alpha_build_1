@@ -1,0 +1,37 @@
+
+From 3.17 to whatever
+
+                        Download
+
+
+Firmware or Config via 1K Xmodem:
+C
+Firmware: V 3.90.2 Size=545438 replacing..
+10 secs to press 'Esc' and quit serial download and fake OTA. 'Ctrl X' to stop waiting...
+size 545438, calc crc 0x96c0, img crc 0x96c0
+CRC OK, Writing firmware.....................................01/01/00,00:00:00 Hello from MTU4 init...
+Option bytes: fffaae1
+Restore state, sz 103
+01/01/00,00:00:00 Set fuel level 0x00
+01/01/00,00:00:00 CCE: Setting states to 0x00000000
+
+
+3.90.2 to whater
+
+                        Download
+
+
+Firmware or Config via  1K Xmodem:
+CPI: New firmware ver 3.17.5
+PI: Image size 772292 downloaded 773120
+01/01/00,00:00:00 Hello from MTU4 init...
+Option bytes: fffaae1
+Restore state, sz 173
+01/01/00,00:00:00 Set fuel level 0x00
+01/01/00,00:00:00 CCE: Setting states to 0x00000000
+01/01/00,00:00:00 Flags M e
+01/01/00,00:00:00 Restored GPI states to 0x00
+01/01/00,00:00:00 BS: Restore ok 98 bytes, 0x60001402
+01/01/00,00:00:00 Asset Block: error, read failed
+01/01/00,00:00:00 Restore AssetIMEI failed, len 1
+

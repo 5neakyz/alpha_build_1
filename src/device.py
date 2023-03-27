@@ -139,6 +139,23 @@ class Device():
         #print(status)
         return status
 
+    def install_checker(self):
+        '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
+        if you press esc it will cancel install'''
+        for _ in range(10):
+            time.sleep(0.05)
+            lines = self.ser.readlines()
+
+            if not lines: continue
+            
+            if "Ctrl X" in str(lines):
+                self.write_commands(chr(24))
+                #print("SENDING CTRL X")
+
+
+
+
+
 
     def read_config(self):
         out = ""
