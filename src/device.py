@@ -150,7 +150,7 @@ class Device():
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
-                #print("SENDING CTRL X")
+                print("SENDING CTRL X")
 
 
 
