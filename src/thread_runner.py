@@ -82,10 +82,10 @@ class ThreadRunner():
         if self.personality_path == None or self.firmware_path == None:
             return False
         
-        if not self.push_firmware(obj)[1]:
+        if not self.push_firmware(obj):
             return False
 
-        if not self.push_personality(obj)[1]:
+        if not self.push_personality(obj):
             return False
         
         return True
