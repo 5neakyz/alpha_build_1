@@ -15,7 +15,7 @@ from thread_runner import ThreadRunner
 from pb_data import pb_data
 from device import Device
 
-class MyApp():
+class Multi_Stager_Gui():
     def __init__(self,root):
 # - - - gui config - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.root_window = root
@@ -50,6 +50,7 @@ class MyApp():
             self.COM_items.append(item.device)
         self.COM_items.sort()
         self.selected_coms = []
+        # for display purposes
         self.selected_coms_str = tk.StringVar(value=self.selected_coms)
         self.com_objects = []
 
@@ -80,6 +81,7 @@ class MyApp():
         #menubar.add_command(label="More?",command=self.toggle_unit_info_display)
         menubar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.get_unit_info("config")).start())
         menubar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.get_unit_info("status")).start())
+        menubar.add_command(label="F: Prod TS",command=lambda: threading.Thread(target=self.get_unit_info("prodts")).start())
 
         menu_settings.add_command(label="Toggle Info",command=self.toggle_unit_info_display)
         #menu_settings.add_command(label="baudrate")
@@ -209,6 +211,8 @@ class MyApp():
             return device.read_config()
         if self.unit_info_option == "status":
             return device.read_status()
+        if self.unit_info_option == "prodts":
+            return device.prod_test_screen()
         return False
 
     def populate_unit_info(self,mode=None):
@@ -409,4 +413,4 @@ if __name__ == '__main__':
     format = "%(asctime)s.%(msecs)04d: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
-    app = MyApp(tk.Tk())
+    app = Multi_Stager_Gui(tk.Tk())

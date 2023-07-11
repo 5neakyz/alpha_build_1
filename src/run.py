@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk 
 
 
-from MyNewGui import MyApp
+from MyNewGui import Multi_Stager_Gui
 
 if __name__ == "__main__":
-    app = MyApp(tk.Tk())
+    app = Multi_Stager_Gui(tk.Tk())
     

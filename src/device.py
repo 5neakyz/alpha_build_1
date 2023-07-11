@@ -47,7 +47,7 @@ class Device():
         for _ in range(5):
             if self.is_alive():
                 break
-        else: return False
+        else: return None
 
         self.write_commands(["esc", "3"])
 
@@ -193,3 +193,24 @@ class Device():
             return [self.device,out]
                 
         return [self.device,"No READ"]
+
+
+    def prod_test_screen(self):
+        out = ""
+        for _ in range(5):
+            if self.is_alive(): break
+        else: return False
+
+        self.write_commands(["esc", "f"])
+        for _ in range(50):
+            lines = self.ser.readlines()
+
+            if not lines: continue
+
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                out +=(y.decode('utf-8')+ ' \n')
+            return [self.device,out]
+                
+        return [self.device,"No READ"]
+
