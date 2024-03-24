@@ -20,13 +20,13 @@ class Multi_Stager_Gui():
 # - - - gui config - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.root_window = root
         self.root_window.title("ML Multi Units")
-        icon_path = self.resource_path("assests/myicon.ico")
+        icon_path = self.resource_path("gui/assests/myicon.ico")
         self.root_window.iconbitmap(icon_path)
         #self.root_window.geometry("600x600")
         self.root_window.option_add("*tearOff", False) # This is always a good idea
         # Import the tcl file
         #self.root_window.tk.call('source', 'Forest-ttk-theme-master/forest-dark.tcl')
-        style_path = self.resource_path('assests/Forest-ttk-theme-master/forest-dark.tcl')
+        style_path = self.resource_path('gui/assests/Forest-ttk-theme-master/forest-dark.tcl')
         self.root_window.tk.call('source', style_path)
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-dark')
