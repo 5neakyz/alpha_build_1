@@ -29,7 +29,10 @@ class TungstenGui(tk.Tk):
         self.tk.call('source', style_path)
         ttk.Style().theme_use('forest-dark')
         s = ttk.Style()
-        s.configure('2b.TFrame', background='red')#2B2B2B
+        s.configure('red.TFrame', background='red')#2B2B2B
+        s.configure('green.TFrame',background="green")
+        s.configure('blue.TFrame',background="blue")
+
 
         ##vars
         self.raw_comports = serial.tools.list_ports.comports()
@@ -64,8 +67,10 @@ class TungstenGui(tk.Tk):
 class MenuBar(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        ttk.Label(self,background="#247F4C").pack(expand=True,fill="both")
-        self.place(x=0,y=0,relwidth=1,height=25)
+        #ttk.Label(self,background="#247F4C").pack(expand=True,fill="both")
+        #self.place(x=0,y=0,relwidth=1,height=25)
+        self.pack(fill="y",side="top")
+        #self.config(style='blue.TFrame')
 
     def donothing():
         pass
@@ -74,15 +79,16 @@ class Sidebar(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
         # create sidebar frame with widgets
-        #ttk.Label(self,background="#2B2B2B").pack(expand=True,fill="both")
-        self.place(x=0,y=25,width=180,relheight=1)
-        #self.config(style='2b.TFrame')
+        #self.place(x=0,y=25,width=180,relheight=1)
+
+        self.pack(fill="y",side="left")
+        #self.config(style='green.TFrame')
 
         #create widgets
         self.run_btn  = ttk.Button(self,text="Run",command=lambda: threading.Thread(target=self.run_btn_press(parent)).start())
         self.connect_btn = ttk.Button(self,text="Connect")
         self.disconnect_btn = ttk.Button(self,text="Disconnect")
-        self.listbox = tk.Listbox(self,listvariable=parent.list_box_items,font=('',14),height=5)
+        self.listbox = tk.Listbox(self,listvariable=parent.list_box_items,font=('',14),height=5,width=10)
         #functions on click listbox
         self.listbox.bind('<<ListboxSelect>>', self.items_selected)
 
@@ -96,7 +102,7 @@ class Sidebar(ttk.Frame):
         self.connect_btn.grid(row=2,column=1,sticky="new",padx=20, pady=(20, 0))
         self.disconnect_btn.grid(row=3,column=1,sticky="new",padx=20, pady=(20, 0))
         # list box
-        self.listbox.grid(row=4,column=1,sticky="new",padx=20, pady=(20, 0))
+        self.listbox.grid(row=4,column=1,sticky="nw",padx=20, pady=(20, 0))
         # alternate line colors
         try:
             for i in range(0,len(parent.comports),2):
@@ -123,7 +129,10 @@ class MainArea(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
         #ttk.Label(self,background="#242424").pack(expand=True,fill="both")
-        self.place(x=180,y=25,relwidth=1,relheight=1)
+        #self.place(x=180,y=25,relwidth=1,relheight=0.99)
+
+        self.pack(fill="both",anchor="nw")
+        self.config(style='red.TFrame')
 
         self.radio_ml_options = RadioMLOption(self)
         self.file_path_selction = FilePathSelection(self)
@@ -139,7 +148,7 @@ class RadioMLOption(ttk.Frame):
         #ttk.Label(self,background="red").pack(expand=True,fill="both")
         #self.place(x=0,y=0,relwidth=1,height=35)
         self.pack(side="top",anchor="nw",fill="x")
-        #self.config(style='2b.TFrame')
+        #self.config(style='red.TFrame')
 
         self.columnconfigure((1,2,3,4),weight=0)
         self.rowconfigure((1),weight=1)
@@ -160,7 +169,7 @@ class FilePathSelection(ttk.Frame):
         #ttk.Label(self,background="red").pack(expand=True,fill="both")
         #self.place(x=0,y=35,relwidth=1,height=70)
         self.pack(side="top",anchor="nw",fill="x")
-        #self.config(style='2b.TFrame')
+        #self.config(style='red.TFrame')
 
         #create grid on frame
         self.columnconfigure((1,2),weight=0)
@@ -198,14 +207,25 @@ class FilePathSelection(ttk.Frame):
 class DeviceDisplay(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        self.pack(side="top",anchor="nw",expand=True,fill="both")
-        self.config(style='2b.TFrame')
+        self.pack(expand=1,fill="y")
+        self.config(style='red.TFrame')
 
 class InfoBar(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        self.pack(side="top",anchor="nw",expand=True,fill="x")
-        #self.config(style='2b.TFrame')
+        self.pack(fill="both")
+        self.config(style='green.TFrame')
+
+        self.columnconfigure((1,2),weight=0)
+        self.rowconfigure((1,2),weight=0)   
+
+        self.info_text = "Something"
+        self.info_text_str = tk.StringVar(value = self.info_text)
+        self.info_lbl = ttk.Label(self,textvariable=self.info_text_str)
+
+        self.info_lbl.grid(row=1,column=1,padx=2,pady=2)
+
+
 
 if __name__ == "__main__":
     TungstenGui()
