@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
+from tkinter import scrolledtext
 
 import serial.tools.list_ports
 import time
@@ -11,6 +12,7 @@ import threading
 import logging
 import concurrent.futures
 
+#247F4C
 
 class TungstenGui(tk.Tk):
     def __init__(self):
@@ -58,8 +60,30 @@ class TungstenGui(tk.Tk):
         comport_list = []
         for item in self.raw_comports:
             comport_list.append(item.device)
-        comport_list.sort()
-        return comport_list
+        return self.sort_comports(comport_list)
+    
+    def sort_comports(self,list):
+        sorted_list = []
+        for comport in list:
+            comport = comport.replace("COM","")
+            print(comport)
+            try:
+                sorted_list.append(int(comport))
+            except:
+                sorted_list.append(comport)
+
+        sorted_list.sort()
+        list = []
+        
+        for item in sorted_list:
+            item =f"COM{item}"
+            print(item)
+            list.append(item)
+        return list
+
+
+
+
     
     def onKeyPress(self,event):
         print(f'You pressed: {event.keysym}')
@@ -67,10 +91,10 @@ class TungstenGui(tk.Tk):
 class MenuBar(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        #ttk.Label(self,background="#247F4C").pack(expand=True,fill="both")
+        ttk.Label(self,background="#247F4C").pack(expand=True,fill="both")
         #self.place(x=0,y=0,relwidth=1,height=25)
-        self.pack(fill="y",side="top")
-        #self.config(style='blue.TFrame')
+        self.pack(fill="x",side="top")
+        self.config(style='blue.TFrame')
 
     def donothing():
         pass
@@ -82,22 +106,22 @@ class Sidebar(ttk.Frame):
         #self.place(x=0,y=25,width=180,relheight=1)
 
         self.pack(fill="y",side="left")
-        #self.config(style='green.TFrame')
 
         #create widgets
         self.run_btn  = ttk.Button(self,text="Run",command=lambda: threading.Thread(target=self.run_btn_press(parent)).start())
         self.connect_btn = ttk.Button(self,text="Connect")
         self.disconnect_btn = ttk.Button(self,text="Disconnect")
-        self.listbox = tk.Listbox(self,listvariable=parent.list_box_items,font=('',14),height=5,width=10)
+        self.listbox = tk.Listbox(self,listvariable=parent.list_box_items,font=('',14),height=5,width=12)
+        self.selected_devices_frame= ttk.LabelFrame(self,text="Selected Devices")
+        self.selected_devices_placeholder = ttk.Label(self.selected_devices_frame,textvariable=parent.selected_comports_str,wraplength=55)
         #functions on click listbox
-        self.listbox.bind('<<ListboxSelect>>', self.items_selected)
+        self.listbox.bind('<<ListboxSelect>>', lambda event: self.items_selected(event,parent))
 
         #create grid
         self.columnconfigure(1,weight=1)
         self.rowconfigure((1,2,3,4,5,6,7,8,9),weight=0)
 
         #place widgets
-        # place buttons
         self.run_btn.grid(row=1,column=1,sticky="new",padx=20, pady=(20, 0))
         self.connect_btn.grid(row=2,column=1,sticky="new",padx=20, pady=(20, 0))
         self.disconnect_btn.grid(row=3,column=1,sticky="new",padx=20, pady=(20, 0))
@@ -109,21 +133,24 @@ class Sidebar(ttk.Frame):
                 self.listbox.itemconfigure(i, background='#242424')
         except Exception as e: print(f'LIST BOX EXCEPTION{e}')
 
+        self.selected_devices_frame.grid(row=5,column=1)
+        self.selected_devices_placeholder.pack()
+
     def run_btn_press(self,parent):
         print(parent.main_area.radio_ml_options.radio_option.get())
 
 
-    def items_selected(self,event):
+    def items_selected(self,event,parent):
+        print(parent.selected_comports)
         try:
             selected_item = event.widget.get(self.listbox.curselection()[0])
             print(selected_item)
-        #     if selected_item in parent.selected_comports:
-        #         (parent.selected_comports.remove(selected_item))
-        #     else:
-        #         (parent.selected_comports.append(selected_item))
-        #     parent.selected_comports_str.set(parent.selected_comports)
+            if selected_item in parent.selected_comports:
+                (parent.selected_comports.remove(selected_item))
+            else:
+                (parent.selected_comports.append(selected_item))
+            parent.selected_comports_str.set(parent.selected_comports)
         except Exception as e: print(e)
-        # print(parent.selected_comports)
 
 class MainArea(ttk.Frame):
     def __init__(self,parent):
@@ -135,7 +162,7 @@ class MainArea(ttk.Frame):
         self.config(style='red.TFrame')
 
         self.radio_ml_options = RadioMLOption(self)
-        self.file_path_selction = FilePathSelection(self)
+        self.file_path_selection = FilePathSelection(self)
         self.device_display = DeviceDisplay(self)
         self.info_bar = InfoBar(self)
 
@@ -204,11 +231,24 @@ class FilePathSelection(ttk.Frame):
         self.firmware_path = fPath
         self.firmware_path_str.set(fPath)
 
-class DeviceDisplay(ttk.Frame):
+class DeviceDisplay(tk.Canvas):
     def __init__(self,parent):
         super().__init__(parent)
-        self.pack(expand=1,fill="y")
-        self.config(style='red.TFrame')
+        self.pack(expand=True,fill="both")
+
+        self.textBox = scrolledtext.ScrolledText(
+        self,
+        bg="#222222",
+        fg="#eeeeee",
+        border=0,
+        wrap="none",
+        highlightbackground="#247F4C",
+        highlightthickness=2,
+        font=("Sans", "10", "bold"),
+    )
+        
+        self.textBox.configure(padx=10, pady=10)
+        self.textBox.pack(expand=True,fill="both")
 
 class InfoBar(ttk.Frame):
     def __init__(self,parent):
@@ -225,7 +265,60 @@ class InfoBar(ttk.Frame):
 
         self.info_lbl.grid(row=1,column=1,padx=2,pady=2)
 
+# class ScrollFrame(ttk.Frame):
+#     def __init__(self, parent):
+#         super().__init__(parent) # create a frame (self)
 
+#         s=ttk.Style()
+#         s.configure('TFrame', background="#eff0f1")
 
+#         #place canvas on self
+#         self.canvas = tk.Canvas(self, borderwidth=0, background="#eff0f1", height = 600)
+#         #place a frame on the canvas, this frame will hold the child widgets
+#         self.viewPort = ttk.Frame(self.canvas, style='TFrame')
+#         #place a scrollbar on self
+#         self.vsb = ttk.Scrollbar(self, orient="vertical")
+#         #attach scrollbar action to scroll of canvas
+#         self.canvas.configure(yscrollcommand=self.vsb.set)
+
+#         #pack scrollbar to right of self
+#         self.vsb.pack(side="right", fill="y")
+#         #pack canvas to left of self and expand to fil
+#         self.canvas.pack(side="left", fill="both", expand=True)
+#         self.canvas_window = self.canvas.create_window((4,4),
+#                                                  #add view port frame to canvas
+#                                                  window=self.viewPort, anchor="nw",
+#                                                  tags="self.viewPort")
+
+#         #bind an event whenever the size of the viewPort frame changes.
+#         self.viewPort.bind("<Configure>", self.onFrameConfigure)
+#         #bind an event whenever the size of the viewPort frame changes.
+#         self.canvas.bind("<Configure>", self.onCanvasConfigure)
+
+#         #perform an initial stretch on render, otherwise the scroll region has a tiny border until the first resize
+#         self.onFrameConfigure(None)
+
+#         self.viewPort.bind('<Enter>', self._bound_to_mousewheel)
+#         self.viewPort.bind('<Leave>', self._unbound_to_mousewheel)
+
+#     def _bound_to_mousewheel(self, event):
+#         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+#     def _unbound_to_mousewheel(self, event):
+#         self.canvas.unbind_all("<MouseWheel>")
+
+#     def _on_mousewheel(self, event):
+#         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+#     def onFrameConfigure(self, event):
+#         '''Reset the scroll region to encompass the inner frame'''
+#         #whenever the size of the frame changes, alter the scroll region respectively.
+#         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+#     def onCanvasConfigure(self, event):
+#         '''Reset the canvas window to encompass inner frame when required'''
+#         canvas_width = event.width
+#         #whenever the size of the canvas changes alter the window region respectively.
+#         self.canvas.itemconfig(self.canvas_window, width = canvas_width)
 if __name__ == "__main__":
     TungstenGui()

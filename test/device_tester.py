@@ -140,6 +140,17 @@ class Device():
         #print(status)
         return status
 
+    def read(self):
+        self.write_commands(["esc","4"])
+        for _ in range(500):
+            lines = self.ser.readline()
+            print(lines)
+            #if not lines:continue
+            #print(f"LINES :\n{lines}")
+            # for line in lines:
+            #     print(line)
+                #y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                #out +=(y.decode('utf-8')+ ' \n') 
 
 
 if __name__ == '__main__':
@@ -147,13 +158,13 @@ if __name__ == '__main__':
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
 
-    myunit = Device("COM9")
+    myunit = Device("COM5")
     myunit.firmware_path="J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.88.0_c741.bin"
     #myunit.firmware_path="J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.84.0_b981.bin"
     myunit.personality_path="J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_CT_Microl_DAFCF_040619.txt"
-    logging.info(f"DEVICE STATUS IsAlive: {myunit.is_alive()}")
+    #logging.info(f"DEVICE STATUS IsAlive: {myunit.is_alive()}")
     # logging.info(f"Clear CONFIG : {myunit.erase_config()}")
-    logging.info(f"CONFIG : {myunit.read_config()[1]}")
+    myunit.read()
     # logging.info(f"push firm : {myunit.push(2)}")
     # logging.info(f"push pers : {myunit.push(1)}")
     #logging.info(f"CONFIG : {myunit.read_config()}")
