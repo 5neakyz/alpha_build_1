@@ -23,23 +23,12 @@ class GUI():
 
         self.portNamesList = []
         self.baudRatesList = [
-            1200,
-            2400,
-            4800,
-            9600,
-            19200,
-            38400,
-            57600,
-            115200,
-            230400,
-            460800,
-            576000,
-            921600,
+            115200
         ]
         self.isAnyPortAvailable = False
         self.isStarted = False
         self.serialPortName = None
-        self.serialPortBaud = 9600
+        self.serialPortBaud = 115200
 
         self.serialPortManager = SerialPortManager(self.serialPortBaud)
         self.get_available_serial_ports()
@@ -95,7 +84,7 @@ class GUI():
         # Define a tk.IntVar for storing selected item in OptionMenu
         self.selectedBaudRate = tk.IntVar()
         # Set default value of selectedBaudRate
-        self.selectedBaudRate.set(self.baudRatesList[3])
+        self.selectedBaudRate.set(self.baudRatesList[0])
         self.baudRatesOptionMenu = tk.OptionMenu(
             self.topFrame, self.selectedBaudRate, *self.baudRatesList
         )
@@ -126,6 +115,20 @@ class GUI():
             font=("Sans", "10", "bold"),
             command=self.start_button_command,
         )
+
+        self.doButton = tk.Button(
+            self.topFrame,
+            text="DO",
+            bg="#00a832",
+            fg="#ffffff",
+            border=0,
+            highlightbackground="#ffffff",
+            highlightthickness=2,
+            activebackground="#3fcc69",
+            activeforeground="#ffffff",
+            font=("Sans", "10", "bold"),
+            command=self.do_something,
+        )
         if self.isAnyPortAvailable == False:
             self.connectButton.configure(
                 state="disabled", bg="#bbbbbb", highlightbackground="#aaaaaa"
@@ -151,9 +154,9 @@ class GUI():
 
         spacing = 10
         padding = 10
-        widget_width = 800
+        widget_width = 1200
         window_width = widget_width + 2 * padding
-        window_height = 500
+        window_height = 800
 
         # Size of application window
         self.window.geometry("{}x{}".format(window_width, window_height))
@@ -174,6 +177,8 @@ class GUI():
 
         self.connectButton.configure(width=widget_width, padx=padding, pady=padding)
         self.connectButton.pack(pady=(0, spacing))
+        self.doButton.configure(width=widget_width, padx=padding, pady=padding)
+        self.doButton.pack(pady=(0, spacing))
 
         self.textBox.configure(width=widget_width, padx=padding, pady=padding)
         self.textBox.pack()
@@ -181,6 +186,11 @@ class GUI():
         self.window.protocol("WM_DELETE_WINDOW", self.close_window)
         # Blocking loop for GUI (Always put at the end)
         self.window.mainloop()
+
+
+    def do_something(self):
+        self.serialPortManager.write_commands("esc")
+        print("doing something")
 
     def start_button_command(self):
 
@@ -340,6 +350,17 @@ class SerialPortManager():
         # Clear serial port buffer
         self.serialPortBuffer = bytearray()
         return buffer
+    
+    def write_commands(self,commands):
+        for i, command in enumerate(commands):
+            if command =="esc":
+                command = (chr(27))
+            try:
+                self.serialPort.write(command.encode())
+            except Exception as e: print(e)
+
+            if commands[i] != commands[-1]:# if last command in commands do not load menu so i can view it else where
+                self.serialPort.readlines()# waits for the menu to load, needed other wise commands get sent too fast for the ML
 
     def __del__(self):
         if self.serialPort.isOpen():
