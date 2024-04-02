@@ -47,6 +47,7 @@ class TungstenGui(tk.Tk):
         self.menu_bar = MenuBar(self)
         self.menu_bar = Sidebar(self)
         self.main_area = MainArea(self)
+        self.info_bar = InfoBar(self)
 
 
         self.mainloop()
@@ -133,8 +134,8 @@ class Sidebar(ttk.Frame):
                 self.listbox.itemconfigure(i, background='#242424')
         except Exception as e: print(f'LIST BOX EXCEPTION{e}')
 
-        self.selected_devices_frame.grid(row=5,column=1)
-        self.selected_devices_placeholder.pack()
+        self.selected_devices_frame.grid(row=5,column=1,sticky="new",padx=20, pady=(20, 0))
+        self.selected_devices_placeholder.pack(padx=20,pady=20)
 
     def run_btn_press(self,parent):
         print(parent.main_area.radio_ml_options.radio_option.get())
@@ -164,7 +165,7 @@ class MainArea(ttk.Frame):
         self.radio_ml_options = RadioMLOption(self)
         self.file_path_selection = FilePathSelection(self)
         self.device_display = DeviceDisplay(self)
-        self.info_bar = InfoBar(self)
+        #self.info_bar = InfoBar(self)
 
     def create_widgets(self,parent):
       pass  
@@ -253,7 +254,7 @@ class DeviceDisplay(tk.Canvas):
 class InfoBar(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        self.pack(fill="both")
+        self.pack(anchor="sw",side="bottom",fill="both")
         self.config(style='green.TFrame')
 
         self.columnconfigure((1,2),weight=0)
@@ -265,60 +266,5 @@ class InfoBar(ttk.Frame):
 
         self.info_lbl.grid(row=1,column=1,padx=2,pady=2)
 
-# class ScrollFrame(ttk.Frame):
-#     def __init__(self, parent):
-#         super().__init__(parent) # create a frame (self)
-
-#         s=ttk.Style()
-#         s.configure('TFrame', background="#eff0f1")
-
-#         #place canvas on self
-#         self.canvas = tk.Canvas(self, borderwidth=0, background="#eff0f1", height = 600)
-#         #place a frame on the canvas, this frame will hold the child widgets
-#         self.viewPort = ttk.Frame(self.canvas, style='TFrame')
-#         #place a scrollbar on self
-#         self.vsb = ttk.Scrollbar(self, orient="vertical")
-#         #attach scrollbar action to scroll of canvas
-#         self.canvas.configure(yscrollcommand=self.vsb.set)
-
-#         #pack scrollbar to right of self
-#         self.vsb.pack(side="right", fill="y")
-#         #pack canvas to left of self and expand to fil
-#         self.canvas.pack(side="left", fill="both", expand=True)
-#         self.canvas_window = self.canvas.create_window((4,4),
-#                                                  #add view port frame to canvas
-#                                                  window=self.viewPort, anchor="nw",
-#                                                  tags="self.viewPort")
-
-#         #bind an event whenever the size of the viewPort frame changes.
-#         self.viewPort.bind("<Configure>", self.onFrameConfigure)
-#         #bind an event whenever the size of the viewPort frame changes.
-#         self.canvas.bind("<Configure>", self.onCanvasConfigure)
-
-#         #perform an initial stretch on render, otherwise the scroll region has a tiny border until the first resize
-#         self.onFrameConfigure(None)
-
-#         self.viewPort.bind('<Enter>', self._bound_to_mousewheel)
-#         self.viewPort.bind('<Leave>', self._unbound_to_mousewheel)
-
-#     def _bound_to_mousewheel(self, event):
-#         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-#     def _unbound_to_mousewheel(self, event):
-#         self.canvas.unbind_all("<MouseWheel>")
-
-#     def _on_mousewheel(self, event):
-#         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-#     def onFrameConfigure(self, event):
-#         '''Reset the scroll region to encompass the inner frame'''
-#         #whenever the size of the frame changes, alter the scroll region respectively.
-#         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
-#     def onCanvasConfigure(self, event):
-#         '''Reset the canvas window to encompass inner frame when required'''
-#         canvas_width = event.width
-#         #whenever the size of the canvas changes alter the window region respectively.
-#         self.canvas.itemconfig(self.canvas_window, width = canvas_width)
 if __name__ == "__main__":
     TungstenGui()
