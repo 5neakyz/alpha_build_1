@@ -194,10 +194,8 @@ class RadioMLOption(ttk.Frame):
 class FilePathSelection(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
-        #ttk.Label(self,background="red").pack(expand=True,fill="both")
-        #self.place(x=0,y=35,relwidth=1,height=70)
+        
         self.pack(side="top",anchor="nw",fill="x")
-        #self.config(style='red.TFrame')
 
         #create grid on frame
         self.columnconfigure((1,2),weight=0)
