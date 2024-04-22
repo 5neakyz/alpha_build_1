@@ -164,7 +164,8 @@ class MainArea(ttk.Frame):
 
         self.radio_ml_options = RadioMLOption(self)
         self.file_path_selection = FilePathSelection(self)
-        self.device_display = DeviceDisplay(self)
+        #self.device_display = DeviceDisplay(self)
+        self.test = Test(self).pack(expand=True,fill="both")
         #self.info_bar = InfoBar(self)
 
     def create_widgets(self,parent):
@@ -229,6 +230,21 @@ class FilePathSelection(ttk.Frame):
         fPath = fd.askopenfilename()
         self.firmware_path = fPath
         self.firmware_path_str.set(fPath)
+
+class Test(ttk.Frame):
+    def __init__(self,parent):
+        super().__init__(parent)
+        self.columnconfigure((1,2,3,4),weight=0)
+        self.rowconfigure((1,2,3,4),weight=0)
+        self.lab1=ttk.Label(self,background="#ff3333")
+        self.lab2=ttk.Label(self,background="#aaffff")
+        self.lab3=ttk.Label(self,background="#bb1859")
+        self.lab4=ttk.Label(self,background="#765342")
+        self.lab1.pack(expand=True,fill="both")
+        self.lab1.grid(column=1)
+        self.lab2.grid(column=2)
+        self.lab3.grid(column=3)
+        self.lab4.grid(column=4)
 
 class DeviceDisplay(tk.Canvas):
     def __init__(self,parent):
