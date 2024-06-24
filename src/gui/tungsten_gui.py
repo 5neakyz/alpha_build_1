@@ -19,7 +19,7 @@ class TungstenGui(tk.Tk):
         super().__init__()
         # configure window
         self.title("5neakyz")
-        self.geometry(f"{1200}x{600}")
+        self.geometry(f"{1960}x{1080}")
 
         self.bind('<KeyPress>', self.onKeyPress)
 

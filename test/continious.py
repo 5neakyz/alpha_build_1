@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     thread_handler = DeviceHandler(unit)
     #print(thread_handler.begin_continuous_read())
-    threading.Thread(target=thread_handler.begin).start()
+    threading.Thread(target=thread_handler.begin_continuous_read()).start()
 
     time.sleep(3)
     thread_handler.interrupt()
