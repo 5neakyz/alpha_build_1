@@ -58,8 +58,10 @@ class Multi_Stager_Gui():
 
         self.firmware_path= None
         self.personality_path = None
+        self.BLE_path = None
         self.firmware_path_str = tk.StringVar(value=self.firmware_path)
         self.personality_path_str = tk.StringVar(value=self.personality_path)
+        self.BLE_path_str = tk.StringVar(value=self.BLE_path)
 
         self.hex_red = '#b40d1b'
         self.hex_green = '#217346'
@@ -150,19 +152,28 @@ class Multi_Stager_Gui():
         self.selected_firmwware_frame.pack(padx=10,pady=5,expand=True,fill="x")
 
         self.firmware_placeholder = ttk.Label(self.selected_firmwware_frame,textvariable=self.firmware_path_str,wraplength=250)
-        self.firmware_placeholder.pack(padx=10,pady=5)
+        self.firmware_placeholder.pack(padx=10,pady=5,expand=True)
+
+        self.slct_firm_path_btn = ttk.Button(self.select_files_frame,text="Select Firmware",command=self.get_firmware_path)
+        self.slct_firm_path_btn.pack(padx=10,pady=10)
 
         self.selected_personality_frame=ttk.LabelFrame(self.select_files_frame,text="Personality Path")
         self.selected_personality_frame.pack(padx=10,pady=5,expand=True,fill="x")
 
         self.personality_placeholder = ttk.Label(self.selected_personality_frame,textvariable=self.personality_path_str,wraplength=250)
-        self.personality_placeholder.pack(padx=10,pady=5)
-
-        self.slct_firm_path_btn = ttk.Button(self.select_files_frame,text="Select Firmware",command=self.get_firmware_path)
-        self.slct_firm_path_btn.pack(padx=10,pady=10,expand=True,anchor="s",side="left")
+        self.personality_placeholder.pack(padx=10,pady=5,expand=True)
 
         self.slct_pers_path_btn = ttk.Button(self.select_files_frame,text="Select Personality",command=self.get_personality_path)
-        self.slct_pers_path_btn.pack(padx=10,pady=10,expand=True,anchor="s",side="left")
+        self.slct_pers_path_btn.pack(padx=10,pady=10)
+
+        self.selected_BLE_frame=ttk.LabelFrame(self.select_files_frame,text="BLE Path")
+        self.selected_BLE_frame.pack(padx=10,pady=5,expand=True,fill="x")
+
+        self.BLE_placeholder = ttk.Label(self.selected_BLE_frame,textvariable=self.BLE_path_str,wraplength=250)
+        self.BLE_placeholder.pack(padx=10,pady=5,expand=True)
+
+        self.slct_BLE_path_btn = ttk.Button(self.select_files_frame,text="Selected BLE",command=self.get_BLE_path)
+        self.slct_BLE_path_btn.pack(padx=10,pady=10)
 
 # - - - Run Frame - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
         self.run_frame = ttk.LabelFrame(self.root_window,text="Run")
@@ -300,16 +311,17 @@ class Multi_Stager_Gui():
         #update gui
         self.clear_child_in_frame(self.results_frame)
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
-        print(f'PB STUFF{self.my_pb_object.total}')
         self.my_pb_object.progress = 0
         self.progress_bar["value"] = 0
         self.results_frame.config(text="Running...")
         #start
+        logging.info(f"Starting Thread for {self.com_objects}")
         my_thread = ThreadRunner(self.com_objects)
         #check box values
         my_thread.tasks = [self.check_erase_config.get(),self.check_push_pers.get(),self.check_push_firm.get(),self.check_push_BLE.get()]
         my_thread.personality_path = self.personality_path
         my_thread.firmware_path = self.firmware_path
+        my_thread.BLE_path = self.BLE_path
         my_thread.my_pb_object = self.my_pb_object
         self.update_progress()
         results = my_thread.thread_run()
@@ -385,6 +397,11 @@ class Multi_Stager_Gui():
         fPath = fd.askopenfilename()
         self.firmware_path = fPath
         self.firmware_path_str.set(fPath)
+
+    def get_BLE_path(self):
+        blePath = fd.askopenfilename()
+        self.BLE_path = blePath
+        self.BLE_path_str.set(blePath)
 
 
     def update_progress_loop(self):

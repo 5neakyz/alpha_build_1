@@ -108,19 +108,9 @@ class Device():
         #print(f'PByte: {pbytes}')
         return  pbytes or None 
     
-    """
-    MODES should probs change this
-    1 - Push Personality
-    2 - Push Firmware
-    """
-    def push(self,mode=-1):
-        if mode == 1:# MODE 1 push personality
-            if self.personality_path is None: return False
-            else: path = self.personality_path
-        elif mode == 2:# MODE 2 push Firmware
-            if self.firmware_path is None: return False
-            else: path = self.firmware_path
-        else: return False
+    def push(self,path):
+        if not path:
+            return False 
 
         for _ in range(5):
             if self.is_alive():

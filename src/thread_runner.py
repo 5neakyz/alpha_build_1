@@ -1,10 +1,12 @@
 import concurrent.futures
 import time
+import logging
 class ThreadRunner():
-    def __init__(self,device_objects,my_pb_object=None,personality_path=None,firmware_path=None,tasks=[0,0,0,0],):
+    def __init__(self,device_objects,my_pb_object=None,personality_path=None,firmware_path=None,BLE_path=None,tasks=[0,0,0,0],):
         self.device_objects = device_objects
         self.personality_path = personality_path
         self.firmware_path = firmware_path
+        self.BLE_path = BLE_path
         self.tasks = tasks
         self.my_pb_object = my_pb_object
     """
@@ -18,39 +20,26 @@ class ThreadRunner():
         obj.pb_object = self.my_pb_object
         
         if self.tasks[0] > 0: # erase config
+            logging.info(f"Erasing Config")
             if not self.erase_config(obj):
                 return [obj.device,False]
+            
         if self.tasks[2] > 0: # Push Firmware
+            logging.info(f"Pushing Firmware")
             if not self.push_firmware(obj):
                 return [obj.device,False]
+            
         if self.tasks[1] > 0: # push personality
+            logging.info(f"Pusing Personality")
             if not self.push_personality(obj):
                 return [obj.device,False]
+            
         if self.tasks[3] > 0: # Push BLE
+            logging.info(f"Pushing BLE")
             if not self.push_BLE(obj):
                 return [obj.device,False]
             
         return [obj.device,True]
-
-
-        # if obj.is_alive() == True:
-        #     obj.pb_object = self.my_pb_object
-        #     match self.mode:
-        #         case 1:#erase Config
-        #             return [obj.device, self.erase_config(obj)]
-        #         case 2:#push personality only
-        #             return [obj.device, self.push_personality(obj)]
-        #         case 3:#push firmware only
-        #             return [obj.device, self.push_firmware(obj)]
-        #         case 4:#push both personality and firmware
-        #             return [obj.device, self.push_both(obj)]
-        #         case _:
-        #             return [obj.device,False]
-
-        # else:
-        #     return [obj.device,False]
-
-
 
     def erase_config(self,obj):
         if obj.erase_config() == True and obj.is_config() == False:
@@ -64,22 +53,32 @@ class ThreadRunner():
 
         obj.erase_config()
         obj.personality_path =self.personality_path
-        if obj.push(1) and obj.is_config(): 
+        if obj.push(self.personality_path) and obj.is_config(): 
             return True
 
         return False
+    
+    def push_BLE(self,obj):
+        if self.BLE_path == None:
+            return False
+
+        if not obj.push(self.BLE_path): 
+            return False
+        
+        if not obj.install_checker():
+            return False
+
+        return True 
 
     def push_firmware(self,obj):
         if self.firmware_path == None:
             return False
         
-        obj.firmware_path =self.firmware_path
-
         obj.erase_config()
         if obj.is_config():
             return False
 
-        if not obj.push(2): 
+        if not obj.push(self.firmware_path): 
             return False
         
         if not obj.install_checker():
