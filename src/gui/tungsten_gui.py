@@ -82,10 +82,6 @@ class TungstenGui(tk.Tk):
             list.append(item)
         return list
 
-
-
-
-    
     def onKeyPress(self,event):
         print(f'You pressed: {event.keysym}')
 
@@ -272,6 +268,7 @@ class DeviceDisplay(tk.Canvas):
         
         self.textBox.configure(padx=10, pady=10)
         self.textBox.pack(expand=True,fill="both")
+        self.textBox.insert(tk.INSERT,"TEST")
 
 class InfoBar(ttk.Frame):
     def __init__(self,parent):
@@ -293,11 +290,12 @@ class Tabs(ttk.Notebook):
         super().__init__(parent)
         self.pack(anchor="sw",side="bottom",fill="both")
 
-        #self.tab1 = DeviceDisplay(self)
-        self.tab2 = ttk.Frame(self)
+        self.tab1 = DeviceDisplay(self)
+        self.tab2 = DeviceDisplay(self)
 
-        #self.add(self.tab1,text="Tab 1")
+        self.add(self.tab1,text="Tab 1")
         self.add(self.tab2,text="Tab 2")
+
 
 
 if __name__ == "__main__":
