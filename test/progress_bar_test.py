@@ -19,7 +19,15 @@ class pb_data():
     def add_to_progress(self, value):
         self.progress += value
         return self.progress
+    
+    def percentage(self):
+        if self.total == 0:
+            return (f'{0:.0%}')
+        per = self.progress/self.total
+        return (f'{per:.0%}')
 
+
+##testing
 class MonApp(Tk):
     def __init__(self):
         super().__init__()
@@ -48,11 +56,19 @@ class MonApp(Tk):
 
 
 if __name__ == '__main__':
-    # app = MonApp()
-    # app.mainloop()
-    # file_name = "J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.88.0_c741.bin"
-    # file_stats = os.stat(file_name).st_size
-    # print(file_stats)
+    #app = MonApp()
+    #app.mainloop()
+    #file_name = "J:/gitcode/Multi-ML-1.0/firmware/ml30/ML30_V_3.88.0_c741.bin"
+    #file_stats = os.stat(file_name).st_size
+    #print(file_stats)
 
     PB = pb_data()
     print(PB.total)
+    print(PB.progress)
+    PB.total = 100
+    PB.progress = 0
+    print(PB.total)
+    print(PB.progress)
+    print(PB.percentage())
+    #PB.add_to_progress(10000)
+    print(PB.percentage())

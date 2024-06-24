@@ -209,7 +209,7 @@ class Device():
 
             for line in lines:
                 y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
-                out +=(y.decode('utf-8')+ ' \n')
+                out +=(line.decode('utf-8')+ ' \n')
             return [self.device,out]
                 
         return [self.device,"No READ"]

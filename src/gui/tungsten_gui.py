@@ -162,16 +162,18 @@ class MainArea(ttk.Frame):
         self.pack(fill="both",anchor="nw")
         self.config(style='red.TFrame')
 
-        self.radio_ml_options = RadioMLOption(self)
+        self.radio_ml_options = CheckMLOption(self)
         self.file_path_selection = FilePathSelection(self)
+        self.tabs = Tabs(self)
         #self.device_display = DeviceDisplay(self)
-        self.test = Test(self).pack(expand=True,fill="both")
+        #self.test = Test(self).pack(expand=True,fill="both")
+
         #self.info_bar = InfoBar(self)
 
     def create_widgets(self,parent):
       pass  
 
-class RadioMLOption(ttk.Frame):
+class CheckMLOption(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
         #ttk.Label(self,background="red").pack(expand=True,fill="both")
@@ -182,12 +184,18 @@ class RadioMLOption(ttk.Frame):
         self.columnconfigure((1,2,3,4),weight=0)
         self.rowconfigure((1),weight=1)
 
-        self.radio_option = tk.IntVar(value=1)
+        #self.radio_option = tk.IntVar(value=1)
+        self.check_erase_config = tk.IntVar()
+        self.check_push_pers = tk.IntVar()
+        self.check_push_firm = tk.IntVar()
+        self.check_push_BLE = tk.IntVar()
 
-        self.radio_1=ttk.Radiobutton(self, text="Erase Config",variable=self.radio_option,value=1).grid(row=1,column=1,padx=1,pady=1,sticky="w")
-        self.radio_2=ttk.Radiobutton(self, text="Push Personality Only",variable=self.radio_option,value=2).grid(row=1,column=2,padx=1,pady=1,sticky="w")
-        self.radio_3=ttk.Radiobutton(self, text="Push Firmware Only",variable=self.radio_option,value=3).grid(row=1,column=3,padx=1,pady=1,sticky="w")
-        self.radio_4=ttk.Radiobutton(self, text="Push Both Firmware and Personality",value=4,variable=self.radio_option).grid(row=1,column=4,padx=1,pady=1,sticky="w")
+        self.check_1=ttk.Checkbutton(self, text="Erase Config",variable=self.check_erase_config)
+        self.check_2=ttk.Checkbutton(self, text="Push Personality",variable=self.check_push_pers).grid(row=1,column=2,padx=1,pady=1,sticky="w")
+        self.check_3=ttk.Checkbutton(self, text="Push Firmware",variable=self.check_push_firm).grid(row=1,column=3,padx=1,pady=1,sticky="w")
+        self.check_4=ttk.Checkbutton(self, text="Push BLE",variable=self.check_push_BLE).grid(row=1,column=4,padx=1,pady=1,sticky="w")
+
+        self.check_1.grid(row=1,column=1,padx=1,pady=1,sticky="w")
 
     def get_radio_selection(self):
         return self.radio_option.get()
@@ -241,10 +249,10 @@ class Test(ttk.Frame):
         self.lab3=ttk.Label(self,background="#bb1859")
         self.lab4=ttk.Label(self,background="#765342")
         self.lab1.pack(expand=True,fill="both")
-        self.lab1.grid(column=1)
-        self.lab2.grid(column=2)
-        self.lab3.grid(column=3)
-        self.lab4.grid(column=4)
+        self.lab1.grid(row = 1, column=1)
+        self.lab2.grid(row = 1, column=2)
+        self.lab3.grid(row = 2, column=1)
+        self.lab4.grid(row = 2, column=2)
 
 class DeviceDisplay(tk.Canvas):
     def __init__(self,parent):
@@ -279,6 +287,18 @@ class InfoBar(ttk.Frame):
         self.info_lbl = ttk.Label(self,textvariable=self.info_text_str)
 
         self.info_lbl.grid(row=1,column=1,padx=2,pady=2)
+
+class Tabs(ttk.Notebook):
+    def __init__(self,parent):
+        super().__init__(parent)
+        self.pack(anchor="sw",side="bottom",fill="both")
+
+        #self.tab1 = DeviceDisplay(self)
+        self.tab2 = ttk.Frame(self)
+
+        #self.add(self.tab1,text="Tab 1")
+        self.add(self.tab2,text="Tab 2")
+
 
 if __name__ == "__main__":
     TungstenGui()
