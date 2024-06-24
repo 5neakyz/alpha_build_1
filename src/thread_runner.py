@@ -1,11 +1,11 @@
 import concurrent.futures
 import time
 class ThreadRunner():
-    def __init__(self,device_objects,my_pb_object=None,personality_path=None,firmware_path=None,mode=-1,):
+    def __init__(self,device_objects,my_pb_object=None,personality_path=None,firmware_path=None,tasks=[0,0,0,0],):
         self.device_objects = device_objects
         self.personality_path = personality_path
         self.firmware_path = firmware_path
-        self.mode = mode 
+        self.tasks = tasks
         self.my_pb_object = my_pb_object
     """
     MODES -
@@ -15,22 +15,40 @@ class ThreadRunner():
     4 - Push both Firmware and personality
     """
     def work_horse(self,obj):
-        if obj.is_alive() == True:
-            obj.pb_object = self.my_pb_object
-            match self.mode:
-                case 1:#erase Config
-                    return [obj.device, self.erase_config(obj)]
-                case 2:#push personality only
-                    return [obj.device, self.push_personality(obj)]
-                case 3:#push firmware only
-                    return [obj.device, self.push_firmware(obj)]
-                case 4:#push both personality and firmware
-                    return [obj.device, self.push_both(obj)]
-                case _:
-                    return [obj.device,False]
+        obj.pb_object = self.my_pb_object
+        
+        if self.tasks[0] > 0: # erase config
+            if not self.erase_config(obj):
+                return [obj.device,False]
+        if self.tasks[2] > 0: # Push Firmware
+            if not self.push_firmware(obj):
+                return [obj.device,False]
+        if self.tasks[1] > 0: # push personality
+            if not self.push_personality(obj):
+                return [obj.device,False]
+        if self.tasks[3] > 0: # Push BLE
+            if not self.push_BLE(obj):
+                return [obj.device,False]
+            
+        return [obj.device,True]
 
-        else:
-            return [obj.device,False]
+
+        # if obj.is_alive() == True:
+        #     obj.pb_object = self.my_pb_object
+        #     match self.mode:
+        #         case 1:#erase Config
+        #             return [obj.device, self.erase_config(obj)]
+        #         case 2:#push personality only
+        #             return [obj.device, self.push_personality(obj)]
+        #         case 3:#push firmware only
+        #             return [obj.device, self.push_firmware(obj)]
+        #         case 4:#push both personality and firmware
+        #             return [obj.device, self.push_both(obj)]
+        #         case _:
+        #             return [obj.device,False]
+
+        # else:
+        #     return [obj.device,False]
 
 
 
@@ -64,8 +82,8 @@ class ThreadRunner():
         if not obj.push(2): 
             return False
         
-
-        obj.install_checker()
+        if not obj.install_checker():
+            return False
 
         obj.write_commands(["esc"])
         
@@ -77,18 +95,6 @@ class ThreadRunner():
             time.sleep(0.5)
         else: return False
 
-
-    def push_both(self,obj):
-        if self.personality_path == None or self.firmware_path == None:
-            return False
-        
-        if not self.push_firmware(obj):
-            return False
-
-        if not self.push_personality(obj):
-            return False
-        
-        return True
 
     def thread_run(self):
         results = []

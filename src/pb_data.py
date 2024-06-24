@@ -17,4 +17,4 @@ if __name__ == '__main__':
     pb.total = 100
     for _ in range(10):
         pb.add_to_progress(10)
-        print(f"{pb.total}/{pb.progress}")
+        print(f"{pb.progress}/{pb.total}")

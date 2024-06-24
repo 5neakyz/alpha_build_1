@@ -128,16 +128,19 @@ class Multi_Stager_Gui():
         self.disconnect_device_btn = ttk.Button(self.device_selection_frame, text="Disconnect",command=lambda: threading.Thread(target=self.disconnect_btn_press).start())
         self.disconnect_device_btn.pack(padx=10,pady=10,expand=True,anchor="s",side="left")
 
-# - - - radio box - config type/ option - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        self.radio_option = tk.IntVar(value=1)
+# - - - check box - config type/ option - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        self.check_erase_config = tk.IntVar()
+        self.check_push_pers = tk.IntVar()
+        self.check_push_firm = tk.IntVar()
+        self.check_push_BLE = tk.IntVar()
         #box for config options
         self.config_options_frame = ttk.LabelFrame(self.root_window,text="Config Options")
         self.config_options_frame.grid(row=0, column=1, padx=(20, 10), pady=10, sticky="nsew")
         #config options
-        self.radio_1=ttk.Radiobutton(self.config_options_frame, text="Erase Config",variable=self.radio_option,value=1).pack(padx=5, pady=5,anchor="w")
-        self.radio_2=ttk.Radiobutton(self.config_options_frame, text="Push Personality Only",variable=self.radio_option,value=2).pack(padx=5, pady=5,anchor="w")
-        self.radio_3=ttk.Radiobutton(self.config_options_frame, text="Push Firmware Only",variable=self.radio_option,value=3).pack(padx=5, pady=5,anchor="w")
-        self.radio_4=ttk.Radiobutton(self.config_options_frame, text="Push Both Firmware and Personality",value=4,variable=self.radio_option).pack(padx=5, pady=5,anchor="w")
+        self.check_1=ttk.Checkbutton(self.config_options_frame, text="Erase Config",variable=self.check_erase_config).pack(padx=5, pady=5,anchor="w")
+        self.check_2=ttk.Checkbutton(self.config_options_frame, text="Push Personality",variable=self.check_push_pers).pack(padx=5, pady=5,anchor="w")
+        self.check_3=ttk.Checkbutton(self.config_options_frame, text="Push Firmware",variable=self.check_push_firm).pack(padx=5, pady=5,anchor="w")
+        self.check_4=ttk.Checkbutton(self.config_options_frame, text="Push BLE",variable=self.check_push_BLE).pack(padx=5, pady=5,anchor="w")
 
 # - - - file selection - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         self.select_files_frame = ttk.LabelFrame(self.root_window,text="Select Files")
@@ -297,12 +300,14 @@ class Multi_Stager_Gui():
         #update gui
         self.clear_child_in_frame(self.results_frame)
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
+        print(f'PB STUFF{self.my_pb_object.total}')
         self.my_pb_object.progress = 0
         self.progress_bar["value"] = 0
         self.results_frame.config(text="Running...")
         #start
         my_thread = ThreadRunner(self.com_objects)
-        my_thread.mode = self.radio_option.get()#radio button list values
+        #check box values
+        my_thread.tasks = [self.check_erase_config.get(),self.check_push_pers.get(),self.check_push_firm.get(),self.check_push_BLE.get()]
         my_thread.personality_path = self.personality_path
         my_thread.firmware_path = self.firmware_path
         my_thread.my_pb_object = self.my_pb_object

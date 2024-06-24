@@ -95,7 +95,7 @@ class Device():
     def getc(self,size, timeout=1):
         for _ in range (20):
             gbytes = self.ser.read(size)
-            print(f'GByte: {gbytes}')
+            #print(f'GByte: {gbytes}')
             if gbytes:
                 break
             time.sleep(0.1)
@@ -105,7 +105,7 @@ class Device():
         pbytes = self.ser.write(data)
         self.pb_object.add_to_progress(1028)
         #time.sleep(0.1) # have to wait otherwise it reads nothing
-        print(f'PByte: {pbytes}')
+        #print(f'PByte: {pbytes}')
         return  pbytes or None 
     
     """
@@ -142,19 +142,23 @@ class Device():
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        for _ in range(10):
-            time.sleep(0.05)
+        for _ in range(100):
+            time.sleep(0.3)
             lines = self.ser.readlines()
 
             if not lines: continue
+
+            print(lines)
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
                 print("SENDING CTRL X")
+                break
 
-
-
-
+            if "install failed" in str(lines):
+                print(f'INSTALL FAILED')
+                return False
+        return True
 
 
     def read_config(self):
