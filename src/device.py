@@ -109,25 +109,36 @@ class Device():
         return  pbytes or None 
     
     def push(self,path):
+    
         if not path:
             return False 
 
+        #check unit is responsive 
         for _ in range(5):
             if self.is_alive():
                 break
         else: return False
         
-        
+        # setup xmodem
         modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
         stream = open(path, 'rb')
 
+        #open download menu of unit
         self.write_commands(["esc","6"])
 
+        #read download menu
         for _ in range(4):#can only read first 4 lines of download screen, have to push on the 5th
             self.ser.readline()
+        logging.info(f'Started: Sending file')
+        #send file
         status = modem.send(stream)
-        #print(status)
-        return status
+        logging.info(f'Data Stream Status: {status}')
+
+        # checks
+        logging.info(f'Begging checks:')
+        self.install_checker()
+
+        return True
 
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
@@ -137,8 +148,14 @@ class Device():
             lines = self.ser.readlines()
 
             if not lines: continue
-
-            print(lines)
+            out = ""
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                try:
+                    out +=(y.decode('utf-8')+ ' \n')
+                except Exception as e: print(e,y)
+           
+            print(out)
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
@@ -148,8 +165,12 @@ class Device():
             if "install failed" in str(lines):
                 print(f'INSTALL FAILED')
                 return False
+            
+            if "Hello" in str(lines):
+                logging.info(f'Unit replied with Hello')
+                break 
+            
         return True
-
 
     def read_config(self):
         out = ""
