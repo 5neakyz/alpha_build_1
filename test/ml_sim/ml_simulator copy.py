@@ -1,3 +1,4 @@
+
 import serial.tools.list_ports
 import serial
 from xmodem import XMODEM
@@ -7,21 +8,33 @@ import threading
 import logging
 import concurrent.futures
 
+"""
+basic (trash) simulator of an ML unit for testing purposes
+
+COM 0 COM
+virtual com connections between
+home pc
+COM3 - COM4
+
+Sim - COM3 
+Tera Term - COM4 
+
+"""
+
 class SerialPortManger():
-    def __init__(self,comport_name):# device is string like "COM6"
+    def __init__(self,comport_name):
         self.serial_connection = False
-        self.is_running = False
         self.serial_port = None
         self.serial_port_name = comport_name
         self.serial_port_baud = 115200
-        # Create a byte array to store incoming data
-        self.serial_port_buffer = bytearray()
 
         try:
-            self.serial_port = serial.Serial(self.serial_port_name, self.serial_port_baud, timeout=0.050)
+            self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=2)
         except Exception:
             logging.info("SERIAL IN USE")#probably
             self.serial_connection=False
+
+        logging.info(f'Connection Established: {self.serial_port_name}')
 
     def disconnect(self):
         self.serial_port.close()
@@ -47,53 +60,54 @@ class Device(SerialPortManger):
             lines = self.serial_port.readline()
             print(lines)
 
-class DeviceHandler():
+class Listener():
     def __init__(self,*devices):
         super().__init__()
         self.devices = devices
         self.is_running = False
         self.needs_interrupt = False 
- 
-    def continuous_read(self,device):
-        '''
-        '''
+
+    def interrupt(self):
+        logging.info(f'Interrupting Listener')
+        self.needs_interrupt = True
+
+    def listening(self,device):
         self.is_running = True
-        logging.info(f'Thread Started for: {device.serial_port_name}')
+        logging.info(f'Thread Started, Listening: {device.serial_port_name}')
 
         while self.is_running and not self.needs_interrupt:
-            print(device.readlines())
+            time.sleep(0.05)
+            lines = device.serial_port.readlines()
 
-
-    def begin_continuous_read(self):
+            if not lines: continue
+            out = ""
+            for line in lines:
+                y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+                try:
+                    out +=(y.decode('utf-8')+ ' \n')
+                except Exception as e: print(e,y)
+            print(out)
+    
+    def start_listening(self):
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
-            tasks = [executor.submit(self.continuous_read,device) for device in self.devices]
+            tasks = [executor.submit(self.listening,device) for device in self.devices]
             for x in concurrent.futures.as_completed(tasks):
                 results.append(x.result())
         return results
-
-    def interrupt(self):
-        print("interrupting")
-        self.needs_interrupt = True
-
 
 if __name__ == '__main__':
 
     format = "%(asctime)s: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
-    
-    unit = Device("COM4")
-    unit.ml_read()
-    
-    #thread_handler = DeviceHandler(unit)
-    #print(thread_handler.begin_continuous_read())
-    #threading.Thread(target=thread_handler.begin_continuous_read()).start()
-
-    #time.sleep(3)
-    #thread_handler.interrupt()
-
-
-
-
-
+    print(f'setup unit')
+    print(f'listener')
+    sg14 = Device("COM4")
+    ml30 = Device("COM13")
+    listener = Listener(sg14,ml30)
+    listener.start_listening()
+    print(f'sending command')
+    sg14.write_commands(["esc", "4"])
+    time.sleep(5)
+    listener.interrupt()
