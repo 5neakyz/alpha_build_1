@@ -76,17 +76,17 @@ class Listener():
         logging.info(f'Thread Started, Listening: {device.serial_port_name}')
 
         while self.is_running and not self.needs_interrupt:
-            line = device.serial_port.readline()
+            lines = device.serial_port.readlines()
             #for line in lines:
-            print(f'{device.serial_port_name} : {line}')
             # if not lines: continue
             # out = ""
             # for line in lines:
-            #     y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ')
+            #     y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ').replace(b'\r',b'').replace(b'\x1b',b'')
             #     try:
             #         out +=(y.decode('utf-8')+ ' \n')
             #     except Exception as e: print(e,y)
-            # print(out)
+            #print(out)
+            print(f'{device.serial_port_name} : {self.format_readlines(lines)}')
     
     def start_listening(self):
         results = []
@@ -95,6 +95,17 @@ class Listener():
             for x in concurrent.futures.as_completed(tasks):
                 results.append(x.result())
         return results
+    
+    def format_readlines(self,lines):
+        output = ''
+
+        for line in lines:
+            text = line.strip().replace(b'\t', b'').replace(b'\n',b'').replace(b'\r',b'').replace(b'\x1b',b'').replace(b'\xfe',b'')
+            try:
+                output +=(text.decode('utf-8')+ ' \n')
+            except Exception as e: print(e,text)
+
+        return output
 
 if __name__ == '__main__':
 
