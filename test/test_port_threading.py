@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import scrolledtext
-
+import time
 # Communication with serial port
 import serial
 from serial.tools import list_ports
-
+import logging
 # Multi-threading
 import threading
 
@@ -280,13 +280,20 @@ class GUI():
         self.selectedPort.set(portNames[0])
 
     def recursive_update_textbox(self):
+        logging.info(f'reading buffer')
         serialPortBuffer = self.serialPortManager.read_buffer()
+        logging.info(f'buffer read')
         # Update textbox in a kind of recursive function using Tkinter after() method
+        logging.info(f'deleting text box contents')
+        self.textBox.delete('1.0',tk.END)
+        logging.info(f'populating text box')
         self.textBox.insert(tk.INSERT, serialPortBuffer.decode("ascii"))
         # autoscroll to the bottom
-        self.textBox.see(tk.END)
+        #self.textBox.see(tk.END)
         # Recursively call recursive_update_textbox using Tkinter after() method
+        logging.info(f'calling my self')
         if self.serialPortManager.isRunning:
+            time.sleep(0.5)
             self.window.after(self.guiUpdateInterval, self.recursive_update_textbox)
 
     def close_window(self):
@@ -373,10 +380,13 @@ class SerialPortManager():
         except UnicodeDecodeError:
             pass
         else:
-            print(character, end="")
+            pass
+            #print(character, end="")
 
 
 if __name__ == "__main__":
-
+    format = "%(asctime)s.%(msecs)04d: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
     # Create the GUI
     gui = GUI("Serial Port + Tkinter GUI")
