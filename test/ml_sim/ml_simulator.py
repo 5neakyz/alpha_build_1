@@ -76,17 +76,9 @@ class Listener():
         logging.info(f'Thread Started, Listening: {device.serial_port_name}')
 
         while self.is_running and not self.needs_interrupt:
-            lines = device.serial_port.readlines()
-            #for line in lines:
-            # if not lines: continue
-            # out = ""
-            # for line in lines:
-            #     y = line.strip().replace(b'\t\t', b'  ').replace(b'\t',b' ').replace(b'\r',b'').replace(b'\x1b',b'')
-            #     try:
-            #         out +=(y.decode('utf-8')+ ' \n')
-            #     except Exception as e: print(e,y)
-            #print(out)
-            print(f'{device.serial_port_name} : {self.format_readlines(lines)}')
+            line = device.serial_port.readline()
+            logging.info(f'{device.serial_port_name} : {line}')
+            #print(f'{device.serial_port_name} : {line}')
     
     def start_listening(self):
         results = []
@@ -119,9 +111,9 @@ if __name__ == '__main__':
     listener = Listener(sg14,ml30)
     t = threading.Thread(target=listener.start_listening)
     t.start()
-    print(f'sending command')
-    sg14.write_commands(["esc", "4"])
-    ml30.write_commands(["esc", "4"])
     time.sleep(1)
-
+    print(f'sending command')
+    sg14.write_commands(["esc","4"])
+    ml30.write_commands(["esc","4"])
+    time.sleep(15)
     listener.interrupt()

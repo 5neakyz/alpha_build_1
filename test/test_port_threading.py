@@ -308,6 +308,7 @@ class SerialPortManager():
         self.isRunning = False
         self.serialPortName = None
         self.serialPortBaud = serialPortBaud
+        self.buffer_text = bytearray()
         self.serialPort = serial.Serial()
         # Create a byte array to store incoming data
         self.serialPortBuffer = bytearray()
@@ -352,11 +353,16 @@ class SerialPortManager():
             self.serialPort.close()
 
     def read_buffer(self):
+        #self.count += 1 
         # Return a copy of serial port buffer
-        buffer = self.serialPortBuffer
+        if not self.serialPortBuffer:
+            print("not")
+            return self.buffer_text
+        self.buffer_text = self.serialPortBuffer
         # Clear serial port buffer
         self.serialPortBuffer = bytearray()
-        return buffer
+        #return bytes(f'TESTING {self.count}','UTF-8')
+        return self.buffer_text
     
     def write_commands(self,commands):
         for i, command in enumerate(commands):
