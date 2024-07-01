@@ -101,6 +101,8 @@ class Listener():
 
 if __name__ == '__main__':
 
+    #self.button.clicked.connect(self.copy_text)
+
     format = "%(asctime)s: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
