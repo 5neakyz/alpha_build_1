@@ -12,6 +12,9 @@ import threading
 import logging
 import concurrent.futures
 
+#my classes
+from ml_device import Device
+
 #247F4C
 
 class TungstenGui(tk.Tk):
@@ -37,12 +40,12 @@ class TungstenGui(tk.Tk):
 
 
         ##vars
-        self.raw_comports = serial.tools.list_ports.comports()
-        self.comports = self.get_comport_names()
-        self.list_box_items = tk.Variable(self,value=self.comports)
-        self.selected_comports = []
-        self.selected_comports_str = tk.StringVar(value=self.selected_comports)
-
+        self.raw_comports = serial.tools.list_ports.comports() # comports on pc
+        self.comports = self.get_comport_names() #comport names
+        self.list_box_items = tk.Variable(self,value=self.comports)#comport names as string for listbox
+        self.selected_comports = [] # user selection
+        self.selected_comports_str = tk.StringVar(value=self.selected_comports) # string list
+        self.devices = []
 #frames / gui setup
 
 # Menu Bar
@@ -151,6 +154,41 @@ class TungstenGui(tk.Tk):
 
         self.mainloop()
 
+    def run_btn_press(self):
+        print(f'run')
+
+    def connect_btn_press(self):
+        #change frame text 
+        self.side_bar_selected_devices_frame.configure(text="Connecting")
+        #remove all in selected devices frame
+        self.clear_child_in_frame(self.side_bar_selected_devices_frame)
+        temp_devices_list = []
+        for device in self.devices:
+            temp_devices_list.append(device.device)
+
+        for device in self.selected_comports():
+            if device not in temp_devices_list:
+                self.devices.append()
+        #create threadpool for all devices threadpool(function , devices)
+        results = self.create_threadpool(self.is_connection_live,self.co)
+        #reset frame text
+        self.side_bar_selected_devices_frame.configure(text="Selected Devices")
+
+    def disconnect_btn_press(self):
+        pass
+
+    def create_threadpool(self,function,items):
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+            tasks = [executor.submit(function,item) for item in items]
+            for x in concurrent.futures.as_completed(tasks):
+                results.append(x.result())
+        return results
+
+    def clear_child_in_frame(self,*frames):
+        for frame in frames:
+            for widgets in frame.winfo_children():
+                widgets.destroy()
 
     def get_path(self,type):
         path = fd.askopenfilename()
@@ -165,10 +203,6 @@ class TungstenGui(tk.Tk):
             self.ble_path = tail
             self.ble_path_str.set(tail)
         
-    def run_btn_press(self):
-        print(f'run')
-
-
     def items_selected(self,event):
         print(self.selected_comports)
         try:
@@ -213,18 +247,6 @@ class TungstenGui(tk.Tk):
 
     def onKeyPress(self,event):
         print(f'You pressed: {event.keysym}')
-
-class MenuBar(ttk.Frame):
-    def __init__(self,parent):
-        super().__init__(parent)
-        ttk.Label(self,background="#247F4C").pack(expand=True,fill="both")
-        #self.place(x=0,y=0,relwidth=1,height=25)
-        self.pack(fill="x",side="top")
-        self.config(style='blue.TFrame')
-
-    def donothing():
-        pass
-
 
 if __name__ == "__main__":
     TungstenGui()

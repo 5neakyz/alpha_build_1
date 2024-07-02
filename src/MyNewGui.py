@@ -255,6 +255,7 @@ class Multi_Stager_Gui():
         self.selected_devices_frame.configure(text="Connecting")
         #check to see if any objects already exist,if no objects then temp list is skipped
         temp_obj_list = []#need a temp list as need .device attribute of the objects
+        print(f'COM OBJECTS {self.com_objects}')
         for ob in self.com_objects:
             temp_obj_list.append(ob.device)
         #creates the objects and adds them to com object list , skips dupes
