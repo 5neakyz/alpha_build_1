@@ -13,7 +13,7 @@ import logging
 import concurrent.futures
 
 #my classes
-from ml_device import Device
+from new.ml_device import Device
 
 #247F4C
 
