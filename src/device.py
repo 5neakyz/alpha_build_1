@@ -124,11 +124,13 @@ class Device():
         stream = open(path, 'rb')
 
         #open download menu of unit
+        logging.info("enter download screen")
         self.write_commands(["esc","6"])
 
         #read download menu
-        for _ in range(4):#can only read first 4 lines of download screen, have to push on the 5th
-            self.ser.readline()
+        for _ in range(5):#can only read first 4 lines of download screen, have to push on the 5th
+            t = self.ser.readline()
+            print(t)
         logging.info(f'Started: Sending file')
         #send file
         status = modem.send(stream)
@@ -136,7 +138,8 @@ class Device():
 
         # checks
         logging.info(f'Begging checks:')
-        self.install_checker()
+        if not self.install_checker():
+            return False
 
         return True
 
@@ -163,6 +166,10 @@ class Device():
                 break
 
             if "install failed" in str(lines):
+                print(f'INSTALL FAILED')
+                return False
+            
+            if "Abort" in str(lines):
                 print(f'INSTALL FAILED')
                 return False
             
