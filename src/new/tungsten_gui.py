@@ -13,7 +13,7 @@ import logging
 import concurrent.futures
 
 #my classes
-from new.ml_device import Device
+from ml_device import Device
 
 #247F4C
 
@@ -64,8 +64,8 @@ class TungstenGui(tk.Tk):
         self.side_bar.pack(fill="y",side="left")
         #create widgets
         self.side_bar_run_btn  = ttk.Button(self.side_bar,text="Run",command=lambda: threading.Thread(target=self.run_btn_press).start())
-        self.side_bar_connect_btn = ttk.Button(self.side_bar,text="Connect")
-        self.side_bar_disconnect_btn = ttk.Button(self.side_bar,text="Disconnect")
+        self.side_bar_connect_btn = ttk.Button(self.side_bar,text="Connect",command=lambda: threading.Thread(target=self.connect_btn_press).start())
+        self.side_bar_disconnect_btn = ttk.Button(self.side_bar,text="Disconnect",command=lambda: threading.Thread(target=self.disconnect_btn_press).start())
         self.side_bar_listbox = tk.Listbox(self.side_bar,listvariable=self.list_box_items,font=('',14),height=5,width=12)
         self.side_bar_selected_devices_frame= ttk.LabelFrame(self.side_bar,text="Selected Devices")
         self.side_bar_selected_devices_placeholder = ttk.Label(self.side_bar_selected_devices_frame,textvariable=self.selected_comports_str,wraplength=55)
@@ -97,19 +97,17 @@ class TungstenGui(tk.Tk):
         self.check_buttons = ttk.Frame()
         self.check_buttons.pack(fill="both")
 
-        self.check_buttons.columnconfigure((1,2,3,4),weight=0)
+        self.check_buttons.columnconfigure((1,2,3),weight=0)
         self.check_buttons.rowconfigure((1),weight=1)
 
         #check options values
-        self.check_erase_config = tk.IntVar()
         self.check_push_pers = tk.IntVar()
         self.check_push_firm = tk.IntVar()
         self.check_push_BLE = tk.IntVar()
 
-        self.check_1=ttk.Checkbutton(self.check_buttons, text="Erase Config",variable=self.check_erase_config).grid(row=1,column=1,padx=1,pady=1,sticky="w")
-        self.check_2=ttk.Checkbutton(self.check_buttons, text="Push Personality",variable=self.check_push_pers).grid(row=1,column=2,padx=1,pady=1,sticky="w")
-        self.check_3=ttk.Checkbutton(self.check_buttons, text="Push Firmware",variable=self.check_push_firm).grid(row=1,column=3,padx=1,pady=1,sticky="w")
-        self.check_4=ttk.Checkbutton(self.check_buttons, text="Push BLE",variable=self.check_push_BLE).grid(row=1,column=4,padx=1,pady=1,sticky="w")
+        self.check_2=ttk.Checkbutton(self.check_buttons, text="Push Personality",variable=self.check_push_pers).grid(row=1,column=1,padx=1,pady=1,sticky="w")
+        self.check_3=ttk.Checkbutton(self.check_buttons, text="Push Firmware",variable=self.check_push_firm).grid(row=1,column=2,padx=1,pady=1,sticky="w")
+        self.check_4=ttk.Checkbutton(self.check_buttons, text="Push BLE",variable=self.check_push_BLE).grid(row=1,column=3,padx=1,pady=1,sticky="w")
 
     # file selection 
         self.file_selection = ttk.Frame()
@@ -166,11 +164,11 @@ class TungstenGui(tk.Tk):
         for device in self.devices:
             temp_devices_list.append(device.device)
 
-        for device in self.selected_comports():
+        for device in self.selected_comports:
             if device not in temp_devices_list:
-                self.devices.append()
+                self.devices.append(Device(device))
         #create threadpool for all devices threadpool(function , devices)
-        results = self.create_threadpool(self.is_connection_live,self.co)
+        results = self.create_threadpool(self.is_connection_live,self.devices)
         #reset frame text
         self.side_bar_selected_devices_frame.configure(text="Selected Devices")
 
@@ -248,5 +246,7 @@ class TungstenGui(tk.Tk):
     def onKeyPress(self,event):
         print(f'You pressed: {event.keysym}')
 
+    def is_connection_live(self,unit):
+        return unit.serial_port_name,unit.is_alive()
 if __name__ == "__main__":
     TungstenGui()

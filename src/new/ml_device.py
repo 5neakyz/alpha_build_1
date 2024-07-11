@@ -17,11 +17,12 @@ class SerialPortManger():
 
         try:
             self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=2)
+            self.serial_connection = True
+            logging.info(f'Connection Established: {self.serial_port_name}')
         except Exception:
             logging.info("SERIAL IN USE")#probably
             self.serial_connection=False
 
-        logging.info(f'Connection Established: {self.serial_port_name}')
 
     def disconnect(self):
         self.serial_port.close()
@@ -29,6 +30,13 @@ class SerialPortManger():
 class Device(SerialPortManger):
     def __init__(self,parent):
         super().__init__(parent)
+        self.listener = Listen()
+        self.listener.start_listening()
+
+    def is_alive (self):
+        if self.serial_connection == True:
+            return True
+        return False
 
     def write_commands(self,commands):
         for i, command in enumerate(commands):
@@ -47,6 +55,34 @@ class Device(SerialPortManger):
             lines = self.serial_port.readline()
             print(lines)
 
+
+class Listen():
+    def __init__(self):
+        logging.info(f'creating Listener')
+        self.is_running = False
+        self.needs_interrupt = False 
+        self.buffer_txt = ""
+
+    def get_buffer(self):
+        return self.buffer_txt
+    
+    def interrupt(self):
+        logging.info(f'Interrupting Listener')
+        self.needs_interrupt = True
+
+    def start_listening(self):
+        logging.info(f'Starting Listener')
+        threading.Thread(target=self.listening).start()
+
+    def listening(self):
+        self.is_running = True
+        logging.info(f'Thread Started, Listening: {device.serial_port_name}')
+
+        while self.is_running and not self.needs_interrupt:
+            line = device.serial_port.readline()
+            logging.info(f'{device.serial_port_name} : {line}')
+            #print(f'{device.serial_port_name} : {line}')
+
 class Listener():
     def __init__(self,*devices):
         super().__init__()
@@ -59,6 +95,7 @@ class Listener():
         self.needs_interrupt = True
 
     def listening(self,device):
+        logging.info(f'Listening')
         self.is_running = True
         logging.info(f'Thread Started, Listening: {device.serial_port_name}')
 
@@ -68,6 +105,7 @@ class Listener():
             #print(f'{device.serial_port_name} : {line}')
     
     def start_listening(self):
+        logging.info(f'Starting Listener')
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
             tasks = [executor.submit(self.listening,device) for device in self.devices]
@@ -94,17 +132,16 @@ if __name__ == '__main__':
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
     print(f'setup unit')
-    print(f'listener')
     sg14 = Device("COM4")
-    ml30 = Device("COM13")
-    listener = Listener(sg14,ml30)
-    t = threading.Thread(target=listener.start_listening)
-    t.start()
+    #ml30 = Device("COM13")
+    # listener = Listener(sg14,ml30)
+    # t = threading.Thread(target=listener.start_listening)
+    # t.start()
     time.sleep(1)
-    print(f'sending command')
-    sg14.write_commands(["esc","4"])
-    ml30.write_commands(["esc","4"])
+    # print(f'sending command')
+    # sg14.write_commands(["esc","4"])
+    # ml30.write_commands(["esc","4"])
     time.sleep(15)
-    listener.interrupt()
+    # listener.interrupt()
 
 
