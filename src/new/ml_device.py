@@ -8,6 +8,20 @@ import threading
 import logging
 import concurrent.futures
 
+"""
+Research
+thread-safe Queue object 
+https://stackoverflow.com/questions/5404068/how-to-read-keyboard-input/53344690#53344690
+
+
+
+https://stackoverflow.com/questions/10574821/dynamically-updating-tkinter-window-based-on-serial-data
+
+
+
+"""
+
+
 class SerialPortManger():
     def __init__(self,comport_name):
         self.serial_connection = False

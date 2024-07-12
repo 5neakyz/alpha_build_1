@@ -151,6 +151,14 @@ class TungstenGui(tk.Tk):
 
         self.mainloop()
 
+    def populate_notebook(self):
+        self.clear_child_in_frame(self.tab_view)
+        for device in self.devices:
+            pad = ttk.Frame(self.tab_view)
+            self.tab_view.add(pad,text=device.serial_port_name)
+            label = tk.Text(pad)
+            label.pack()
+            label.insert("end",device.listener.get_buffer())
     def run_btn_press(self):
         print(f'run')
 
@@ -177,6 +185,8 @@ class TungstenGui(tk.Tk):
 
         #reset frame text
         self.side_bar_selected_devices_frame.configure(text="Selected Devices")
+        #notebook
+        self.populate_notebook()
 
     def disconnect_btn_press(self):
         self.clear_child_in_frame(self.side_bar_selected_devices_frame)
@@ -276,8 +286,10 @@ class TungstenGui(tk.Tk):
     
     def close_window(self):
         for device in self.devices:
-            device.listener.interrupt()
-            device.disconnect()
+            try:
+                device.listener.interrupt()
+                device.disconnect()
+            except Exception as e: print(e)
         self.devices.clear()
         self.destroy()
         logging.info(f'Safely closed')

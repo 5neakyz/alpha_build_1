@@ -189,7 +189,7 @@ class GUI():
 
 
     def do_something(self):
-        self.serialPortManager.write_commands("esc")
+        self.serialPortManager.write_commands(["esc"])
         print("doing something")
 
     def start_button_command(self):
@@ -289,7 +289,7 @@ class GUI():
         logging.info(f'populating text box')
         self.textBox.insert(tk.INSERT, serialPortBuffer.decode("ascii"))
         # autoscroll to the bottom
-        #self.textBox.see(tk.END)
+        self.textBox.see(tk.END)
         # Recursively call recursive_update_textbox using Tkinter after() method
         logging.info(f'calling my self')
         if self.serialPortManager.isRunning:
@@ -355,6 +355,7 @@ class SerialPortManager():
     def read_buffer(self):
         #self.count += 1 
         # Return a copy of serial port buffer
+        print(self.buffer_text)
         if not self.serialPortBuffer:
             print("not")
             return self.buffer_text
@@ -372,8 +373,6 @@ class SerialPortManager():
                 self.serialPort.write(command.encode())
             except Exception as e: print(e)
 
-            if commands[i] != commands[-1]:# if last command in commands do not load menu so i can view it else where
-                self.serialPort.readlines()# waits for the menu to load, needed other wise commands get sent too fast for the ML
 
     def __del__(self):
         if self.serialPort.isOpen():

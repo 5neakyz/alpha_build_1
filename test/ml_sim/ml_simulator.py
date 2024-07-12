@@ -159,12 +159,14 @@ class Listener():
                 self.buffer_txt = lines
                 logging.info(f'{self.device.serial_port_name} : {lines}')
                 if b"\x1b" in (lines):
+                    logging.info(f'{self.device.serial_port_name}: sending mainmeu')
                     for line in self.mainmenu:
                         try:
                             self.device.serial_port.write(line)
                         except Exception:
                             logging.info(f'{self.device.serial_port_name}: Failed Sending Commands')
-                if b"command4" in (lines):
+                    time.sleep(2)
+                    logging.info(f'{self.device.serial_port_name}: sending status')
                     for _ in range (10):
                         if self.needs_interrupt:
                             break
@@ -197,7 +199,7 @@ if __name__ == '__main__':
     port = "COM4"
     logging.info(f'Starting ML simulator on: {port}')
     unit = Device(port)
-
+    #unit.write_commands(["esc","4"])
     time.sleep(30)
     unit.listener.interrupt()
     unit.disconnect()
