@@ -152,11 +152,6 @@ class Device():
                 self.write_commands(chr(24))
                 print("SENDING CTRL X")
 
-
-
-
-
-
     def read_config(self):
         out = ""
         for _ in range(5):

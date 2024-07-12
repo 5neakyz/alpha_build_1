@@ -34,6 +34,7 @@ class TungstenGui(tk.Tk):
         self.tk.call('source', style_path)
         ttk.Style().theme_use('forest-dark')
         s = ttk.Style()
+        self.protocol("WM_DELETE_WINDOW",self.close_window)
         s.configure('red.TFrame', background='red')#2B2B2B
         s.configure('green.TFrame',background="green")
         s.configure('blue.TFrame',background="blue")
@@ -148,32 +149,48 @@ class TungstenGui(tk.Tk):
         self.tab_view.add(self.new_pad,text="Tab 1")
 
 
-
-
         self.mainloop()
 
     def run_btn_press(self):
         print(f'run')
 
     def connect_btn_press(self):
+        logging.info(f'Connecting : {self.selected_comports}')
         #change frame text 
         self.side_bar_selected_devices_frame.configure(text="Connecting")
         #remove all in selected devices frame
         self.clear_child_in_frame(self.side_bar_selected_devices_frame)
+        #ensures no duplicates of already existing objects, has no function on first use
         temp_devices_list = []
         for device in self.devices:
             temp_devices_list.append(device.device)
-
+        #creates device objects for devices that dont already exist
         for device in self.selected_comports:
             if device not in temp_devices_list:
                 self.devices.append(Device(device))
         #create threadpool for all devices threadpool(function , devices)
         results = self.create_threadpool(self.is_connection_live,self.devices)
+        #display results
+        self.display_results(self.side_bar_selected_devices_frame,results)
+
+        #insert logic for buttons
+
         #reset frame text
         self.side_bar_selected_devices_frame.configure(text="Selected Devices")
 
     def disconnect_btn_press(self):
-        pass
+        self.clear_child_in_frame(self.side_bar_selected_devices_frame)
+        # safely disconnect current units
+        for device in self.devices:
+            device.listener.interrupt()
+            device.disconnect()
+        #resets all comport variables and re-searches for any new comports
+        self.raw_comports = serial.tools.list_ports.comports() # comports on pc
+        self.comports = self.get_comport_names() #comport names
+        self.devices = []
+        #needs placeholder
+        self.side_bar_selected_devices_placeholder = ttk.Label(self.side_bar_selected_devices_frame,textvariable=self.selected_comports_str,wraplength=55)
+        self.side_bar_selected_devices_placeholder.pack(padx=20,pady=20)
 
     def create_threadpool(self,function,items):
         results = []
@@ -182,6 +199,17 @@ class TungstenGui(tk.Tk):
             for x in concurrent.futures.as_completed(tasks):
                 results.append(x.result())
         return results
+
+    def display_results(self,parent_label,results):
+    # Result[0] (string) = COM PORT
+    # Result[1] (bool)= outcome
+        for result in (results):
+            if result[1] == True:
+                color = '#217346'
+            else:
+                color = '#b40d1b'
+            label = ttk.Label(parent_label,text=result[0],background=color,wraplength=55)
+            label.pack(padx=10, pady=10)
 
     def clear_child_in_frame(self,*frames):
         for frame in frames:
@@ -202,10 +230,9 @@ class TungstenGui(tk.Tk):
             self.ble_path_str.set(tail)
         
     def items_selected(self,event):
-        print(self.selected_comports)
         try:
             selected_item = event.widget.get(self.side_bar_listbox.curselection()[0])
-            print(selected_item)
+            logging.info(f'Selected: {selected_item}')
             if selected_item in self.selected_comports:
                 (self.selected_comports.remove(selected_item))
             else:
@@ -228,7 +255,6 @@ class TungstenGui(tk.Tk):
         sorted_list = []
         for comport in list:
             comport = comport.replace("COM","")
-            print(comport)
             try:
                 sorted_list.append(int(comport))
             except:
@@ -239,7 +265,6 @@ class TungstenGui(tk.Tk):
         
         for item in sorted_list:
             item =f"COM{item}"
-            print(item)
             list.append(item)
         return list
 
@@ -248,5 +273,17 @@ class TungstenGui(tk.Tk):
 
     def is_connection_live(self,unit):
         return unit.serial_port_name,unit.is_alive()
+    
+    def close_window(self):
+        for device in self.devices:
+            device.listener.interrupt()
+            device.disconnect()
+        self.devices.clear()
+        self.destroy()
+        logging.info(f'Safely closed')
+
 if __name__ == "__main__":
+    format = "%(asctime)s.%(msecs)04d: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
     TungstenGui()
