@@ -31,10 +31,9 @@ class Device(SerialPortManger):
     def __init__(self,parent):
         super().__init__(parent)
         logging.info(f'{self.serial_port_name}: Creating Device Object')
-        #only creates listener if there is connection
-        if self.serial_connection:
-            self.listener = Listener(self)
-            self.listener.start_listening()
+
+        self.listener = Listener(self)
+        self.listener.start_listening()
 
     def is_alive (self):
         if self.serial_connection:
@@ -66,10 +65,10 @@ class Device(SerialPortManger):
                     command = (chr(27))     
                 try:
                     self.serial_port.write(command.encode())
-                    return True
                 except Exception:
                     logging.info(f'{self.serial_port_name}: Failed Sending Commands')
                     return False
+            return True
         return False
 
 

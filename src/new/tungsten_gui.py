@@ -163,7 +163,7 @@ class TungstenGui(tk.Tk):
         #ensures no duplicates of already existing objects, has no function on first use
         temp_devices_list = []
         for device in self.devices:
-            temp_devices_list.append(device.device)
+            temp_devices_list.append(device.serial_port_name)
         #creates device objects for devices that dont already exist
         for device in self.selected_comports:
             if device not in temp_devices_list:
