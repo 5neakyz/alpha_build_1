@@ -308,6 +308,8 @@ class Multi_Stager_Gui():
         self.selected_devices_placeholder.pack(padx=10, pady=10)
 
     def run_btn_press(self):
+        start_time = time.time()
+        logging.info(f'starting config deployment')
         #update gui
         self.clear_child_in_frame(self.results_frame)
         self.set_btns_disabled(self.connect_device_btn,self.disconnect_device_btn,self.run_btn)
@@ -335,6 +337,8 @@ class Multi_Stager_Gui():
         #force update progress bar. it works poorly when just eraseing or just pushing personaility 
         self.progress_bar['maximum'] = 100
         self.progress_bar["value"] = 100
+        logging.info(f'Completed Time Taken: {time.time() - start_time}')
+
 
 # - FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def create_threadpool(self,function,items):
