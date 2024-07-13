@@ -154,16 +154,18 @@ class TungstenGui(tk.Tk):
     def populate_notebook(self):
         self.clear_child_in_frame(self.tab_view)
         for device in self.devices:
+            logging.info(f"FOR LOOP {device}")
             pad = ttk.Frame(self.tab_view)
             self.tab_view.add(pad,text=device.serial_port_name)
             label = tk.Text(pad)
             label.pack()
-            self.recursion(pad,label,device)
+            #### I NEED TO CLOSE THIS THREAD ON CLOSE
+            #threading.Thread(target=self.recursion(pad,label,device)).start()
 
 
     def recursion(self,pad,label,device):
+        logging.info(f'RECURSION {device.serial_port_name} {pad} {label} {device} {device.listener.needs_interrupt,device.serial_connection}')
         if not device.listener.needs_interrupt and device.serial_connection:
-            logging.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
             serialPortBuffer = device.listener.get_buffer()
             # Update textbox in a kind of recursive function using Tkinter after() method
             label.delete('1.0',tk.END)
