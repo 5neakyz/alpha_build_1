@@ -158,9 +158,29 @@ class TungstenGui(tk.Tk):
             self.tab_view.add(pad,text=device.serial_port_name)
             label = tk.Text(pad)
             label.pack()
-            label.insert("end",device.listener.get_buffer())
+            self.recursion(pad,label,device)
+
+
+    def recursion(self,pad,label,device):
+        if not device.listener.needs_interrupt and device.serial_connection:
+            logging.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
+            serialPortBuffer = device.listener.get_buffer()
+            # Update textbox in a kind of recursive function using Tkinter after() method
+            label.delete('1.0',tk.END)
+            label.insert(tk.INSERT, serialPortBuffer)
+            # autoscroll to the bottom
+            label.see(tk.END)
+            # Recursively call recursive_update_textbox using Tkinter after() method
+            time.sleep(0.5)
+            try:
+                self.after(pad, self.recursion(pad,label,device))
+            except Exception:
+                logging.warning("Text box Recursion Failed")
+
     def run_btn_press(self):
         print(f'run')
+        for device in self.devices:
+            device.write_commands(["4"])
 
     def connect_btn_press(self):
         logging.info(f'Connecting : {self.selected_comports}')
@@ -194,10 +214,13 @@ class TungstenGui(tk.Tk):
         for device in self.devices:
             device.listener.interrupt()
             device.disconnect()
+            logging.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
         #resets all comport variables and re-searches for any new comports
         self.raw_comports = serial.tools.list_ports.comports() # comports on pc
         self.comports = self.get_comport_names() #comport names
         self.devices = []
+        #
+        self.clear_child_in_frame(self.tab_view)
         #needs placeholder
         self.side_bar_selected_devices_placeholder = ttk.Label(self.side_bar_selected_devices_frame,textvariable=self.selected_comports_str,wraplength=55)
         self.side_bar_selected_devices_placeholder.pack(padx=20,pady=20)

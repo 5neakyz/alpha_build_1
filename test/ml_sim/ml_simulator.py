@@ -107,36 +107,21 @@ class Listener():
                     b'9 - nine\r\n',
                     b'\n'
                     b'Enter >']
-        self.status = [b'\x1b[2'
-                        b'J\r\t\t\tStatus Screen\r\n'
-                        b'\r\n'
-                        b'MTU4 Time\t:30/03/24,14:41:13 \tUptime: 01:25:12\r\n'
-                        b'IMEI\t\t:\tTelit 864: 10.01.020\r\n'
-                        b'Ver\t\t:3.90.2\tcrc 0x96c0 size:545436\r\n'
-                        b'Sig Q\t\t:255 = 0 Percent \r\n'
-                        b'GPRS\t\t:Trying\r\n'
-                        b'IP\t\t:\r\n'
-                        b'IMSI\t\t:\r\n'
-                        b'ICCID\t\t:\r\n'
-                        b'SRVR\t\t:172.17.144.97\t\tNot Connected \t5432\r\n'
-                        b'Power Retain\t:7200\tSleep: 43200=0\tRe-try: 6 \r\n'
-                        b'VIN\t\t:                 \tDriverId :Unknown\r\n'
-                        b'VRN\t\t:               \r\n'
-                        b'\r\n'
-                        b'GPSVer\t\t:HW:00040007\tSW:7.03 (45969)\r\n'
-                        b'Latitude\t: 53.03206253\tPower\t\t:On (24.81v)\r\n'
-                        b'Longitude\t: -1.46555280\tIgnition\t:On\r\n'
-                        b"GPSFix\t\t:TRUE FC 25  \tCh1 'Camera'\t:Low\t(DPD)\r\n"
-                        b"Num Sats\t:8\t\tCh2 'Unknown'\t:High\t(DPU)\r\n"
-                        b"Speed\t\t:  0.275948\tCh3 'Unknown'\t:High\t(DPU)\r\n"
-                        b"Course\t\t:  0.000000\tCh4 'PTO'\t:High\t(DPU)\r\n"
-                        b'Distance\t:0000010301\tShut Down\t:7200s\r\n'
-                        b'GPS Antenna\t:0\t\tBatt Capacity\t:unknown (3.78v)\r\n'
-                        b'GPS err (fHacc)\t:6.30\t\tCharge State\t:Fault\r\n'
-                        b'GPS AvCNO\t:22.00\t\tBT name\t\t:MTU4-728670\r\n'
-                        b'GPS err (HDOP)\t:0.96\r\n'
-                        b'Commissioning field: \r\n'
-                        b'\r\n']
+
+        self.status = [b'[2J\r\t\t\tMain Menu\r\r\n',
+                    b'\r\n',
+                    b'\n',
+                    (f'TIME - {time.strftime("%D %T", time.localtime(time.time()))} \r\n').encode(),
+                    b'2 - two\r\n',
+                    b'3 - three\r\n',
+                    b'4 - four\r\n',
+                    b'5 - five\r\n',
+                    b'6 - six\r\n',
+                    b'7 - seven\r\n',
+                    b'8 - eight\r\n',
+                    b'9 - nine\r\n',
+                    b'\n'
+                    b'Enter >']
         
     def get_buffer(self):
         return self.buffer_txt
@@ -165,17 +150,18 @@ class Listener():
                             self.device.serial_port.write(line)
                         except Exception:
                             logging.info(f'{self.device.serial_port_name}: Failed Sending Commands')
-                    time.sleep(2)
+
+                if b'4' in (lines):
                     logging.info(f'{self.device.serial_port_name}: sending status')
-                    for _ in range (10):
+
+                    for _ in range (100):
                         if self.needs_interrupt:
                             break
-                        for line in self.status:
-                            try:
-                                self.device.serial_port.write(line)
-                            except Exception:
-                                logging.info(f'{self.device.serial_port_name}: Failed Sending Commands')
-                            time.sleep(1)
+                        try:
+                            self.device.serial_port.write((f'TIME - {time.strftime("%D %T", time.localtime(time.time()))} \r\n').encode())
+                        except Exception:
+                            logging.info(f'{self.device.serial_port_name}: Failed Sending Commands')
+                        time.sleep(1)
     
     def format_readlines(self,lines):
         output = ''

@@ -40,6 +40,7 @@ class SerialPortManger():
     def disconnect(self):
         logging.info(f'{self.serial_port_name}: Disconnected')
         self.serial_port.close()
+        self.serial_connection = False
 
 class Device(SerialPortManger):
     def __init__(self,parent):
