@@ -92,7 +92,7 @@ class ThreadRunner():
 
     def thread_run(self):
         results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
+        with concurrent.futures.ThreadPoolExecutor() as executor:
             tasks = [executor.submit(self.work_horse,device) for device in self.device_objects]
             for x in concurrent.futures.as_completed(tasks):
                 results.append(x.result())

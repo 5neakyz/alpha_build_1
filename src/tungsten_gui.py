@@ -13,8 +13,8 @@ import logging
 import concurrent.futures
 
 #my classes
-from ml_device import Device
-
+from device import Device
+from notebook_handler import NotebookHandler
 #247F4C
 
 class TungstenGui(tk.Tk):
@@ -25,6 +25,7 @@ class TungstenGui(tk.Tk):
         self.geometry(f"{1460}x{760}")
 
         self.bind('<KeyPress>', self.onKeyPress)
+        self.bind('<Double-1>',self.copy_on_double_click)
 
         #style
         self.option_add("*tearOff", False) # This is always a good idea
@@ -47,6 +48,7 @@ class TungstenGui(tk.Tk):
         self.selected_comports = [] # user selection
         self.selected_comports_str = tk.StringVar(value=self.selected_comports) # string list
         self.devices = []
+        self.notebook_Handler = None
 #frames / gui setup
 
 # Menu Bar
@@ -153,36 +155,25 @@ class TungstenGui(tk.Tk):
 
     def populate_notebook(self):
         self.clear_child_in_frame(self.tab_view)
+        if self.notebook_Handler:
+            self.notebook_Handler.interrupt()
+        pads = []
+        labels = []
         for device in self.devices:
-            logging.info(f"FOR LOOP {device}")
             pad = ttk.Frame(self.tab_view)
             self.tab_view.add(pad,text=device.serial_port_name)
             label = tk.Text(pad)
-            label.pack()
-            #### I NEED TO CLOSE THIS THREAD ON CLOSE
-            #threading.Thread(target=self.recursion(pad,label,device)).start()
+            label.pack(expand=True,fill="both")
+            pads.append(pad)
+            labels.append(label)
 
-
-    def recursion(self,pad,label,device):
-        logging.info(f'RECURSION {device.serial_port_name} {pad} {label} {device} {device.listener.needs_interrupt,device.serial_connection}')
-        if not device.listener.needs_interrupt and device.serial_connection:
-            serialPortBuffer = device.listener.get_buffer()
-            # Update textbox in a kind of recursive function using Tkinter after() method
-            label.delete('1.0',tk.END)
-            label.insert(tk.INSERT, serialPortBuffer)
-            # autoscroll to the bottom
-            label.see(tk.END)
-            # Recursively call recursive_update_textbox using Tkinter after() method
-            time.sleep(0.5)
-            try:
-                self.after(pad, self.recursion(pad,label,device))
-            except Exception:
-                logging.warning("Text box Recursion Failed")
+        self.notebook_Handler = NotebookHandler(pads,labels,self.devices)
+        self.notebook_Handler.start_handler()
 
     def run_btn_press(self):
         print(f'run')
         for device in self.devices:
-            device.write_commands(["4"])
+            device.write_commands(["esc","4"])
 
     def connect_btn_press(self):
         logging.info(f'Connecting : {self.selected_comports}')
@@ -217,9 +208,12 @@ class TungstenGui(tk.Tk):
             device.listener.interrupt()
             device.disconnect()
             logging.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
+        if self.notebook_Handler:
+            self.notebook_Handler.interrupt()
         #resets all comport variables and re-searches for any new comports
         self.raw_comports = serial.tools.list_ports.comports() # comports on pc
         self.comports = self.get_comport_names() #comport names
+        self.selected_comports_str = tk.StringVar(value=self.selected_comports)
         self.devices = []
         #
         self.clear_child_in_frame(self.tab_view)
@@ -306,6 +300,13 @@ class TungstenGui(tk.Tk):
     def onKeyPress(self,event):
         print(f'You pressed: {event.keysym}')
 
+    def copy_on_double_click(self,event):
+        
+        field_value = event.widget.get(tk.SEL_FIRST, tk.SEL_LAST)  # get field value from event, but remove line return at end
+        print(field_value)
+        self.clipboard_clear()  # clear clipboard contents
+        self.clipboard_append(field_value)  # append new value to clipbaord
+
     def is_connection_live(self,unit):
         return unit.serial_port_name,unit.is_alive()
     
@@ -315,6 +316,8 @@ class TungstenGui(tk.Tk):
                 device.listener.interrupt()
                 device.disconnect()
             except Exception as e: print(e)
+        if self.notebook_Handler:
+            self.notebook_Handler.interrupt()
         self.devices.clear()
         self.destroy()
         logging.info(f'Safely closed')

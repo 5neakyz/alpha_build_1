@@ -113,13 +113,13 @@ class Listener():
         while self.is_running and not self.needs_interrupt:
             lines = self.device.serial_port.readlines()
             if lines:
-                self.buffer_txt = lines
+                self.buffer_txt = self.format(lines)
                 #logging.info(f'{self.device.serial_port_name} : {self.format(lines)}')
 
     def format(self,byte_array_list):
         output = ""
         for line in byte_array_list:
-            stripped = line.strip().replace(b'\t', b' ').replace(b'\r',b' ').replace(b'\x1b',b'').replace(b'\n',b'').replace(b'[2J',b'')
+            stripped = line.strip().replace(b'\t', b' ').replace(b'\r',b' ').replace(b'\x1b',b'').replace(b'\n',b'').replace(b'[2J',b'').replace(b':',b': ')
             if stripped:
                 output += stripped.decode("utf-8") + '\n'
         return output
