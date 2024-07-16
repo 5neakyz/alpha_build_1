@@ -15,6 +15,7 @@ import concurrent.futures
 #my classes
 from device import Device
 from notebook_handler import NotebookHandler
+from stager import Stager
 #247F4C
 
 class TungstenGui(tk.Tk):
@@ -53,10 +54,21 @@ class TungstenGui(tk.Tk):
 
 # Menu Bar
 
-        self.menu_bar = ttk.Frame()
-        self.menu_bar.pack(fill="x",side="top")
-        self.menu_bar_label = ttk.Label(self.menu_bar,background="#247F4C").pack(expand=True,fill="both")
+        self.menu_bar = tk.Menu(self)
 
+        self.menu_settings = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_file = tk.Menu(self.menu_bar)
+        self.menu_help = tk.Menu(self.menu_bar)
+        
+        self.menu_bar.add_cascade(menu=self.menu_file, label='File')
+        self.menu_bar.add_cascade(menu=self.menu_settings, label='Settings')
+        self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
+
+        self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.send_commands(["esc","3"])).start())
+        self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.send_commands(["esc","4"])).start())
+        self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(target=self.send_commands(["esc","f"])).start())
+        
+        self.config(menu=self.menu_bar)
 # Footer Info Bar
         self.footer_bar = ttk.Frame()
         self.footer_bar.pack(fill="x",side="bottom")
@@ -108,8 +120,8 @@ class TungstenGui(tk.Tk):
         self.check_push_firm = tk.IntVar()
         self.check_push_BLE = tk.IntVar()
 
-        self.check_2=ttk.Checkbutton(self.check_buttons, text="Push Personality",variable=self.check_push_pers).grid(row=1,column=1,padx=1,pady=1,sticky="w")
-        self.check_3=ttk.Checkbutton(self.check_buttons, text="Push Firmware",variable=self.check_push_firm).grid(row=1,column=2,padx=1,pady=1,sticky="w")
+        self.check_3=ttk.Checkbutton(self.check_buttons, text="Push Firmware",variable=self.check_push_firm).grid(row=1,column=1,padx=1,pady=1,sticky="w")
+        self.check_2=ttk.Checkbutton(self.check_buttons, text="Push Personality",variable=self.check_push_pers).grid(row=1,column=2,padx=1,pady=1,sticky="w")
         self.check_4=ttk.Checkbutton(self.check_buttons, text="Push BLE",variable=self.check_push_BLE).grid(row=1,column=3,padx=1,pady=1,sticky="w")
 
     # file selection 
@@ -157,23 +169,29 @@ class TungstenGui(tk.Tk):
         self.clear_child_in_frame(self.tab_view)
         if self.notebook_Handler:
             self.notebook_Handler.interrupt()
-        pads = []
         labels = []
         for device in self.devices:
             pad = ttk.Frame(self.tab_view)
             self.tab_view.add(pad,text=device.serial_port_name)
             label = tk.Text(pad)
             label.pack(expand=True,fill="both")
-            pads.append(pad)
             labels.append(label)
 
-        self.notebook_Handler = NotebookHandler(pads,labels,self.devices)
+        self.notebook_Handler = NotebookHandler(labels,self.devices)
         self.notebook_Handler.start_handler()
 
     def run_btn_press(self):
-        print(f'run')
-        for device in self.devices:
-            device.write_commands(["esc","4"])
+        
+        stager_thread = Stager(self.devices)
+        'tasks(pers , firm , BLE)'
+        stager_thread.tasks  = [self.check_push_firm.get(),self.check_push_pers.get(),self.check_push_BLE.get()]
+
+        stager_thread.firmware_path = self.firmware_path
+        stager_thread.personality_path = self.personality_path
+        stager_thread.BLE_path = self.ble_path
+        results = stager_thread.start()
+        print(results)
+
 
     def connect_btn_press(self):
         logging.info(f'Connecting : {self.selected_comports}')
@@ -213,7 +231,7 @@ class TungstenGui(tk.Tk):
         #resets all comport variables and re-searches for any new comports
         self.raw_comports = serial.tools.list_ports.comports() # comports on pc
         self.comports = self.get_comport_names() #comport names
-        self.selected_comports_str = tk.StringVar(value=self.selected_comports)
+        self.list_box_items.set(self.comports)
         self.devices = []
         #
         self.clear_child_in_frame(self.tab_view)
@@ -249,13 +267,13 @@ class TungstenGui(tk.Tk):
         path = fd.askopenfilename()
         head,tail = os.path.split(path)
         if type == "firm":
-            self.firmware_path = tail
+            self.firmware_path = path
             self.firmware_path_str.set(tail)
         if type == "pers":
-            self.personality_path = tail
+            self.personality_path = path
             self.personality_path_str.set(tail)
         if type == "ble":
-            self.ble_path = tail
+            self.ble_path = path
             self.ble_path_str.set(tail)
         
     def items_selected(self,event):
@@ -301,15 +319,20 @@ class TungstenGui(tk.Tk):
         print(f'You pressed: {event.keysym}')
 
     def copy_on_double_click(self,event):
-        
-        field_value = event.widget.get(tk.SEL_FIRST, tk.SEL_LAST)  # get field value from event, but remove line return at end
-        print(field_value)
-        self.clipboard_clear()  # clear clipboard contents
-        self.clipboard_append(field_value)  # append new value to clipbaord
+        try:
+            field_value = event.widget.get(tk.SEL_FIRST, tk.SEL_LAST)
+            self.clipboard_clear()  # clear clipboard contents
+            self.clipboard_append(field_value)  # append new value to clipbaord
+        except Exception:
+            pass
 
     def is_connection_live(self,unit):
         return unit.serial_port_name,unit.is_alive()
     
+    def send_commands(self,commands):
+        for device in self.devices:
+            device.write_commands(commands)
+
     def close_window(self):
         for device in self.devices:
             try:

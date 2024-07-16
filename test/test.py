@@ -10,7 +10,9 @@ import logging
 import concurrent.futures
 
 
-
+test = 0
+if test:
+    print("hello")
 
 devices = ["COM1","COM2","COM3"]
 label = ["lab1","lab2","lab3"]

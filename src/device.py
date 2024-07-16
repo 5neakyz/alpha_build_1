@@ -1,6 +1,6 @@
 import time
 import logging
-
+from xmodem import XMODEM
 from serial_port_manager import SerialPortManger
 from listener import Listener
 
@@ -47,3 +47,79 @@ class Device(SerialPortManger):
                     return False
             return True
         return False
+    
+    #xmodem setup
+    def getc(self,size, timeout=1):
+        for _ in range (20):
+            gbytes = self.serial_port.read(size)
+            #print(f'GByte: {gbytes}')
+            if gbytes:
+                break
+            time.sleep(0.1)
+        return gbytes or None
+    
+    def putc(self,data, timeout=1):
+        pbytes = self.serial_port.write(data)
+        #self.pb_object.add_to_progress(1028)
+        #time.sleep(0.1) # have to wait otherwise it reads nothing
+        #print(f'PByte: {pbytes}')
+        return  pbytes or None 
+    
+    def push(self,path):
+        print("PUSHING")
+        # basic check on path
+        if not path:
+            print(f'FAILED PATH {path}')
+            return False 
+
+        #check unit is responsive 
+        if not self.is_alive():
+            print("failed path")
+            return False
+        
+        # setup xmodem
+        modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
+        stream = open(path, 'rb')
+
+        #open download menu of unit
+        self.write_commands(["esc","6"])
+        time.sleep(1)
+        logging.info(f'Started: Sending file')
+        #send file
+        status = modem.send(stream)
+        logging.info(f'Data Stream Status: {status}')
+
+        # checks
+        # logging.info(f'Begging checks:')
+        # if not self.install_checker():
+        #     return False
+
+        return True
+    
+    def install_checker(self):
+        '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
+        if you press esc it will cancel install'''
+        for _ in range(100):
+            time.sleep(0.3)
+            lines = self.listener.get_buffer()
+
+            if not lines: continue
+            
+            if "Ctrl X" in str(lines):
+                self.write_commands(chr(24))
+                print("SENDING CTRL X")
+                break
+
+            if "install failed" in str(lines):
+                print(f'INSTALL FAILED')
+                return False
+            
+            if "Abort" in str(lines):
+                print(f'INSTALL FAILED')
+                return False
+            
+            if "Hello" in str(lines):
+                logging.info(f'Unit replied with Hello')
+                break 
+            
+        return True

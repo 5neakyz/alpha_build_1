@@ -10,7 +10,7 @@ class SerialPortManger():
         self.serial_port_baud = 115200
 
         try:
-            self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=0.05)
+            self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=0.1)
             self.serial_connection = True
             logging.info(f'{self.serial_port_name}: Connection Established')
         except Exception:
