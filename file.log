@@ -1,1 +1,15 @@
-2024-07-17 20:22:12,694 - __main__ - ERROR - This is an error
+%(asctime)s - %(name)s - %(levelname)s - %(message)s
+%(asctime)s - %(name)s - %(levelname)s - %(message)s
+%(asctime)s - %(name)s - %(levelname)s - %(message)s
+2024-07-17 21:07:15,829 - __main__ - WARNING - This is a warning
+2024-07-17 21:07:15,829 - __main__ - ERROR - This is an error
+2024-07-17 21:07:15,830 - __main__ - INFO - information
+2024-07-17 21:11:54,913 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:11:54,913 - __main__ - INFO - COM3: Creating Device Object
+2024-07-17 21:12:55,230 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:13:40,071 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:13:56,172 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:14:46,655 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:15:57,836 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:16:58,348 - __main__ - INFO - Starting ML simulator on: COM3
+2024-07-17 21:18:41,966 - __main__ - INFO - Starting ML simulator on: COM3

@@ -16,8 +16,8 @@ ESC - for main menu
 class Device(SerialPortManger):
     def __init__(self,parent):
         super().__init__(parent)
-        logging.info(f'{self.serial_port_name}: Creating Device Object')
-
+        self.log = logging.getLogger('Device')
+        self.log.info(f'{self.serial_port_name}: Creating Device Object')
         self.in_menu = False
         self.loop = False
         self.current_time = time.strftime("%D %T", time.localtime(time.time()))
@@ -26,7 +26,7 @@ class Device(SerialPortManger):
         self.listener.start_listening()
 
     def receiver(self,line,stop):
-        logging.info(f'{self.serial_port_name}: Receiving ')
+        self.log.info(f'{self.serial_port_name}: Receiving ')
         if b"\x1b" in line:
             self.in_menu = True
             self.loop = False
@@ -43,7 +43,7 @@ class Device(SerialPortManger):
                 self.write(self.download_screen_lines())
 
     def write(self,lines):
-        logging.info(f'{self.serial_port_name}: Writing ')
+        self.log.info(f'{self.serial_port_name}: Writing ')
         for line in lines:
             try:
                 self.serial_port.write(line)
@@ -52,7 +52,7 @@ class Device(SerialPortManger):
         return True
 
     def constant_write(self,stop):
-        logging.info(f'{self.serial_port_name}: entering write loop ')
+        self.log.info(f'{self.serial_port_name}: entering write loop ')
         while self.loop:
             self.write(self.status_screen_lines(time.strftime("%D %T", time.localtime(time.time()))))
             if stop():
@@ -159,14 +159,24 @@ if __name__ == '__main__':
 
     #self.button.clicked.connect(self.copy_text)
 
-    format = "%(asctime)s: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
-                        datefmt="%H:%M:%S")
+    # format = "%(asctime)s: %(message)s"
+    # logging.basicConfig(format=format, level=logging.INFO,
+    #                     datefmt="%H:%M:%S")
     
+    logger = logging.getLogger(__name__)
+    logger_format = ('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format = logger_format, level=logging.INFO)
+    # Create handlers
+    f_handler = logging.FileHandler('file.log')
+    f_handler.setLevel(logging.INFO)
+    f_handler.setFormatter(logging.Formatter(logger_format))
+    # Add handlers to the logger
+    logger.addHandler(f_handler)
+
     port = "COM3"
-    logging.info(f'Starting ML simulator on: {port}')
+    logger.info(f'Starting ML simulator on: {port}')
     unit = Device(port)
     #unit.write_commands(["esc","4"])
-    time.sleep(60)
+    time.sleep(20)
     unit.listener.interrupt()
     unit.disconnect()

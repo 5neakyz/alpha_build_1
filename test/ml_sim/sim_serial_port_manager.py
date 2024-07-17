@@ -8,6 +8,7 @@ class SerialPortManger():
         self.serial_port = None
         self.serial_port_name = comport_name
         self.serial_port_baud = 115200
+        self.log = logging.getLogger('SerialPortManger')
 
         try:
             self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=0.1)

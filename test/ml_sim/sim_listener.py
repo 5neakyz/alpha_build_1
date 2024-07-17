@@ -10,7 +10,7 @@ class Listener():
         self.buffer_txt = ""
         self.download_temp_interrupt = False
         self.stop_threads = False
-        self.log = logging.getLogger("Listener")
+        self.log = logging.getLogger('Listener')
         self.log.info(f'{device.serial_port_name}: Creating Listener Object')
 
     def continue_read(self):
