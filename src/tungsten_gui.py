@@ -268,12 +268,15 @@ class TungstenGui(tk.Tk):
         head,tail = os.path.split(path)
         if type == "firm":
             self.firmware_path = path
+            print(self.firmware_path)
             self.firmware_path_str.set(tail)
         if type == "pers":
             self.personality_path = path
+            print(self.personality_path)
             self.personality_path_str.set(tail)
         if type == "ble":
             self.ble_path = path
+            print(self.ble_path)
             self.ble_path_str.set(tail)
         
     def items_selected(self,event):

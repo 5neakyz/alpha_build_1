@@ -14,7 +14,7 @@ class Device(SerialPortManger):
 
     def is_alive (self):
         if self.serial_connection:
-            for _ in range(1):
+            for _ in range(5):
                 self.write_commands(["esc"])
                 time.sleep(0.5)
                 x = self.listener.get_buffer()
@@ -74,7 +74,7 @@ class Device(SerialPortManger):
 
         #check unit is responsive 
         if not self.is_alive():
-            print("failed path")
+            print("NOT ALIVE")
             return False
         
         # setup xmodem
@@ -84,15 +84,16 @@ class Device(SerialPortManger):
         #open download menu of unit
         self.write_commands(["esc","6"])
         time.sleep(1)
+        self.listener.pause_read()
         logging.info(f'Started: Sending file')
         #send file
         status = modem.send(stream)
         logging.info(f'Data Stream Status: {status}')
-
+        self.listener.continue_read()
         # checks
         # logging.info(f'Begging checks:')
-        # if not self.install_checker():
-        #     return False
+        if not self.install_checker():
+            return False
 
         return True
     
@@ -100,7 +101,8 @@ class Device(SerialPortManger):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
         for _ in range(100):
-            time.sleep(0.3)
+            logging.info(f"CHECK LOOP {_}")
+            time.sleep(0.5)
             lines = self.listener.get_buffer()
 
             if not lines: continue

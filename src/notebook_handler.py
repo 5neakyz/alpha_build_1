@@ -29,10 +29,7 @@ class NotebookHandler():
         logging.info(f'{device.serial_port_name}: NB Thread Started')
         while self.is_running and not self.needs_interrupt:
             serialPortBuffer = device.listener.get_buffer()
-            # Update textbox in a kind of recursive function using Tkinter after() method
             label.delete('1.0',tk.END)
             label.insert(tk.INSERT, serialPortBuffer)
-            # autoscroll to the bottom
             #label.see(tk.END)
-            # Recursively call recursive_update_textbox using Tkinter after() method
             time.sleep(1)    

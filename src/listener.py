@@ -1,6 +1,6 @@
 import threading
 import logging
-
+import time
 class Listener():
     def __init__(self,device):
         logging.info(f'{device.serial_port_name}: Creating Listener Object')
@@ -8,6 +8,15 @@ class Listener():
         self.is_running = False
         self.needs_interrupt = False 
         self.buffer_txt = ""
+        self.download_temp_interrupt = False
+
+    def continue_read(self):
+        logging.info(f'{self.device.serial_port_name}: continuing Listener')
+        self.download_temp_interrupt = False        
+
+    def pause_read(self):
+        logging.info(f'{self.device.serial_port_name}: Pausing Listener')
+        self.download_temp_interrupt = True  
 
     def get_buffer(self):
         return self.buffer_txt
@@ -25,6 +34,9 @@ class Listener():
         logging.info(f'{self.device.serial_port_name}: Thread Started, Listening')
 
         while self.is_running and not self.needs_interrupt:
+            if self.download_temp_interrupt:
+                time.sleep(0.5)
+                continue
             '''
             ReadLines Version
             '''
@@ -36,7 +48,11 @@ class Listener():
             ReadLine Version
             '''
             line = self.device.serial_port.readline()
+            # logging.info(f'{self.device.serial_port_name}: {line}')
             if line:
+                # if b"Firmware or Config via 1K Xmodem" in line:
+                #     line = self.device.serial_port.readline()
+                #     time.sleep(10)
                 if b'\x1b' in line:
                     self.buffer_txt = ""
                     split = line.split(b'\x1b')
