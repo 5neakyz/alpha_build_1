@@ -64,9 +64,9 @@ class TungstenGui(tk.Tk):
         self.menu_bar.add_cascade(menu=self.menu_settings, label='Settings')
         self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
 
-        self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.send_commands(["esc","3"])).start())
-        self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.send_commands(["esc","4"])).start())
-        self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(target=self.send_commands(["esc","f"])).start())
+        self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(target=self.send_commands,args=(["esc","3"],)).start())
+        self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(target=self.send_commands,args=(["esc","4"],)).start())
+        self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(target=self.send_commands,args=(["esc","f"],)).start())
         
         self.config(menu=self.menu_bar)
 # Footer Info Bar
@@ -140,9 +140,9 @@ class TungstenGui(tk.Tk):
         self.ble_path_str = tk.StringVar(value=self.ble_path)
 
         #create widgets
-        self.select_firmware_btn  = ttk.Button(self.file_selection,text="Firmware",command=lambda: threading.Thread(target=self.get_path("firm")).start())
-        self.select_personality_btn  = ttk.Button(self.file_selection,text="Personality",command=lambda: threading.Thread(target=self.get_path("pers")).start())
-        self.select_ble_btn  = ttk.Button(self.file_selection,text="BLE",command=lambda: threading.Thread(target=self.get_path("ble")).start())
+        self.select_firmware_btn  = ttk.Button(self.file_selection,text="Firmware",command=lambda: threading.Thread(target=self.get_path,args=("firm",)).start())
+        self.select_personality_btn  = ttk.Button(self.file_selection,text="Personality",command=lambda: threading.Thread(target=self.get_path,args=("pers",)).start())
+        self.select_ble_btn  = ttk.Button(self.file_selection,text="BLE",command=lambda: threading.Thread(target=self.get_path,args=("ble",)).start())
         self.firmware_label = ttk.Label(self.file_selection,textvariable=self.firmware_path_str)
         self.personality_label = ttk.Label(self.file_selection,textvariable=self.personality_path_str)
         self.ble_label = ttk.Label(self.file_selection,textvariable=self.ble_path_str)

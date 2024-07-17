@@ -1,22 +1,25 @@
+# logging_example.py
 
-
-import serial.tools.list_ports
-import serial
-from xmodem import XMODEM
-import time
-import os
-import threading
 import logging
-import concurrent.futures
 
+# Create a custom logger
+logger = logging.getLogger(__name__)
 
-test = 0
-if test:
-    print("hello")
+# Create handlers
+c_handler = logging.StreamHandler()
+f_handler = logging.FileHandler('file.log')
+c_handler.setLevel(logging.WARNING)
+f_handler.setLevel(logging.ERROR)
 
-devices = ["COM1","COM2","COM3"]
-label = ["lab1","lab2","lab3"]
+# Create formatters and add it to handlers
+c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+f_handler.setFormatter(f_format)
 
-for device in devices:
-    print(label[devices.index(device)])
+# Add handlers to the logger
+logger.addHandler(c_handler)
+logger.addHandler(f_handler)
 
+logger.warning('This is a warning')
+logger.error('This is an error')

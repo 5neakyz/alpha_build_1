@@ -79,6 +79,7 @@ class Device(SerialPortManger):
         
         # setup xmodem
         modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
+        print(modem.log)
         stream = open(path, 'rb')
 
         #open download menu of unit
