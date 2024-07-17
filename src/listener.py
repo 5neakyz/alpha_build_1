@@ -50,9 +50,6 @@ class Listener():
             line = self.device.serial_port.readline()
             # logging.info(f'{self.device.serial_port_name}: {line}')
             if line:
-                # if b"Firmware or Config via 1K Xmodem" in line:
-                #     line = self.device.serial_port.readline()
-                #     time.sleep(10)
                 if b'\x1b' in line:
                     self.buffer_txt = ""
                     split = line.split(b'\x1b')
