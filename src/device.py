@@ -5,10 +5,10 @@ from serial_port_manager import SerialPortManger
 from listener import Listener
 
 class Device(SerialPortManger):
-    def __init__(self,parent):
+    def __init__(self,parent,progress_bar_object=None):
         super().__init__(parent)
         logging.info(f'{self.serial_port_name}: Creating Device Object')
-
+        self.progress_bar_object = progress_bar_object
         self.listener = Listener(self)
         self.listener.start_listening()
 

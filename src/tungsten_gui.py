@@ -50,6 +50,7 @@ class TungstenGui(tk.Tk):
         self.selected_comports_str = tk.StringVar(value=self.selected_comports) # string list
         self.devices = []
         self.notebook_Handler = None
+        self.progress_bar_object = None
 #frames / gui setup
 
 # Menu Bar
@@ -349,7 +350,6 @@ class TungstenGui(tk.Tk):
         logging.info(f'Safely closed')
 
 if __name__ == "__main__":
-    format = "%(asctime)s.%(msecs)04d: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
-                        datefmt="%H:%M:%S")
+    format = "%(asctime)s.%(msecs)04d - %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
     TungstenGui()

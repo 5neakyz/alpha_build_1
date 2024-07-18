@@ -3,7 +3,7 @@ import time
 import logging
 
 class Stager():
-    def __init__(self,devices,my_pb_object=None,personality_path=None,firmware_path=None,BLE_path=None,tasks=[0,0,0],):
+    def __init__(self,devices:list,progress_bar_object:object=None,personality_path:str=None,firmware_path:str=None,BLE_path:str=None,tasks:list=[0,0,0],):
         self.devices = devices
 
         self.personality_path = personality_path
@@ -16,10 +16,10 @@ class Stager():
         tasks[1] - Push Firmware
         tasks[2] - Push BLE
         '''
-        self.my_pb_object = my_pb_object
+        self.progress_bar_object = progress_bar_object
     
-    def stage(self,device):
-        device.pb_object = self.my_pb_object
+    def stage(self,device:object):
+        device.pb_object = self.progress_bar_object
         print(self.tasks)
         
         if self.tasks[0] or self.tasks[1]: # erase config
