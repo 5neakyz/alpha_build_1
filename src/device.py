@@ -62,7 +62,8 @@ class Device(SerialPortManger):
         pbytes = self.serial_port.write(data)
         self.progress_bar_object.add_to_progress(1028)
         #time.sleep(0.1) # have to wait otherwise it reads nothing
-        #print(f'PByte: {pbytes}')
+        print(f'PByte: {pbytes}')
+        print(f'Data: {len(data)}')
         return  pbytes or None 
     
     def push(self,path):

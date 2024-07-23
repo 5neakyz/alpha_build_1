@@ -24,7 +24,7 @@ class TungstenGui(tk.Tk):
         super().__init__()
         # configure window
         self.title("5neakyz")
-        self.geometry(f"{1460}x{760}")
+        self.geometry(f"{800}x{600}")
 
         self.bind('<KeyPress>', self.onKeyPress)
         self.bind('<Double-1>',self.copy_on_double_click)
@@ -51,7 +51,15 @@ class TungstenGui(tk.Tk):
         self.selected_comports_str = tk.StringVar(value=self.selected_comports) # string list
         self.devices = []
         self.notebook_Handler = None
+        #vars for info footer
         self.progress_bar_object = None
+        self.current_progress = '10 / 100'
+        self.current_progress_str = tk.StringVar(value=self.current_progress)
+        self.current_progress_perc = '0%'
+        self.current_progress_perc_str = tk.StringVar(value=self.current_progress_perc)
+        self.elapsed_time = '00:00:00'
+        self.elapsed_time_str = tk.StringVar(value=self.elapsed_time)
+        
 #frames / gui setup
 
 # Menu Bar
@@ -74,7 +82,10 @@ class TungstenGui(tk.Tk):
 # Footer Info Bar
         self.footer_bar = ttk.Frame()
         self.footer_bar.pack(fill="x",side="bottom")
-        self.footer_bar_label = ttk.Label(self.footer_bar,background="#247F4C").pack(expand=True,fill="both")
+
+        self.elapsed_time_label = ttk.Label(self.footer_bar,textvariable=self.elapsed_time_str).pack(padx=10,pady=10,side="right")
+        self.current_progress_perc_label = ttk.Label(self.footer_bar,textvariable=self.current_progress_perc_str).pack(padx=10,pady=10,side="right")
+        self.current_progress_label = ttk.Label(self.footer_bar,textvariable=self.current_progress_str).pack(padx=10,pady=10,side="right")
 # Side bar
 
         self.side_bar = ttk.Frame()
@@ -193,6 +204,7 @@ class TungstenGui(tk.Tk):
         stager_thread.BLE_path = self.ble_path
         results = stager_thread.start()
         print(results)
+        logging.info(f'{self.progress_bar_object.progress} / {self.progress_bar_object.total}')
 
     def pb_setup(self):
         if not self.firmware_path and not self.personality_path and not self.ble_path:
@@ -200,18 +212,25 @@ class TungstenGui(tk.Tk):
         
         self.progress_bar_object = pb_data()
         file_size = 0
-
         if self.firmware_path:
             file_size += os.stat(self.firmware_path).st_size
         if self.personality_path:
-            file_size += os.stat(self.firmware_path).st_size
+            file_size += os.stat(self.personality_path).st_size
         if self.ble_path:
-            file_size += os.stat(self.firmware_path).st_size
+            file_size += os.stat(self.ble_path).st_size
 
         self.progress_bar_object.total = file_size * len(self.devices)
-        logging.info(f'Progress Bar Total: {self.progress_bar_object.total}')
-        
+        #gui setup
+        self.current_progress = f'{self.progress_bar_object.progress} / {self.progress_bar_object.total}'
+        self.current_progress_str.set(self.current_progress)
 
+        threading.Thread(target=self.update_pb_loop).start()
+        
+    def update_pb_loop(self):
+        while self.progress_bar_object.progress < (self.progress_bar_object.total):
+            time.sleep(0.2)
+            self.current_progress = f'{self.progress_bar_object.progress} / {self.progress_bar_object.total}'
+            self.current_progress_str.set(self.current_progress)
 
     def connect_btn_press(self):
         logging.info(f'Connecting : {self.selected_comports}')
