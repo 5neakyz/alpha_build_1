@@ -60,7 +60,7 @@ class Device(SerialPortManger):
     
     def putc(self,data, timeout=1):
         pbytes = self.serial_port.write(data)
-        #self.pb_object.add_to_progress(1028)
+        self.progress_bar_object.add_to_progress(1028)
         #time.sleep(0.1) # have to wait otherwise it reads nothing
         #print(f'PByte: {pbytes}')
         return  pbytes or None 
@@ -101,8 +101,8 @@ class Device(SerialPortManger):
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        for _ in range(100):
-            logging.info(f"CHECK LOOP {_}")
+        logging.info(f"Pushed File. Starting Checks")
+        for _ in range(120):
             time.sleep(0.5)
             lines = self.listener.get_buffer()
 

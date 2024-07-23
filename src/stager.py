@@ -19,9 +19,11 @@ class Stager():
         self.progress_bar_object = progress_bar_object
     
     def stage(self,device:object):
-        device.pb_object = self.progress_bar_object
-        print(self.tasks)
-        
+        device.progress_bar_object = self.progress_bar_object   
+        '''
+        if we are pushing either personality or firmware eras config
+        to prevent unit from locking up if incompatible 
+        '''
         if self.tasks[0] or self.tasks[1]: # erase config
             logging.info(f"Erasing Config")
             if not device.erase_config():

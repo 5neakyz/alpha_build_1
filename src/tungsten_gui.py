@@ -16,6 +16,7 @@ import concurrent.futures
 from device import Device
 from notebook_handler import NotebookHandler
 from stager import Stager
+from pb_data import pb_data
 #247F4C
 
 class TungstenGui(tk.Tk):
@@ -182,16 +183,34 @@ class TungstenGui(tk.Tk):
         self.notebook_Handler.start_handler()
 
     def run_btn_press(self):
-        
+        self.pb_setup()
         stager_thread = Stager(self.devices)
         'tasks(pers , firm , BLE)'
         stager_thread.tasks  = [self.check_push_firm.get(),self.check_push_pers.get(),self.check_push_BLE.get()]
-
+        stager_thread.progress_bar_object = self.progress_bar_object
         stager_thread.firmware_path = self.firmware_path
         stager_thread.personality_path = self.personality_path
         stager_thread.BLE_path = self.ble_path
         results = stager_thread.start()
         print(results)
+
+    def pb_setup(self):
+        if not self.firmware_path and not self.personality_path and not self.ble_path:
+            return False
+        
+        self.progress_bar_object = pb_data()
+        file_size = 0
+
+        if self.firmware_path:
+            file_size += os.stat(self.firmware_path).st_size
+        if self.personality_path:
+            file_size += os.stat(self.firmware_path).st_size
+        if self.ble_path:
+            file_size += os.stat(self.firmware_path).st_size
+
+        self.progress_bar_object.total = file_size * len(self.devices)
+        logging.info(f'Progress Bar Total: {self.progress_bar_object.total}')
+        
 
 
     def connect_btn_press(self):
