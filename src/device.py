@@ -89,6 +89,8 @@ class Device(SerialPortManger):
         #send file
         status = modem.send(stream)
         logging.info(f'Data Stream Status: {status}')
+        if not status:
+            return False
         self.listener.continue_read()
         # checks
         # logging.info(f'Begging checks:')
