@@ -14,6 +14,8 @@ class pb_data():
         return f'{self.progress}/{self.total}'
     
     def perc_current_progress(self) -> str:
+        if self.progress > self.total:
+                return f'100%'
         perc = self.progress/self.total * 100
         return f'{round(perc)}%'
 
