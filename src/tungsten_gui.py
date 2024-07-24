@@ -86,9 +86,18 @@ class TungstenGui(tk.Tk):
         self.footer_bar = ttk.Frame()
         self.footer_bar.pack(fill="x",side="bottom")
 
-        self.elapsed_time_label = ttk.Label(self.footer_bar,textvariable=self.elapsed_time_str).pack(padx=10,pady=10,side="right")
-        self.current_progress_perc_label = ttk.Label(self.footer_bar,textvariable=self.current_progress_perc_str).pack(padx=10,pady=10,side="right")
-        self.current_progress_label = ttk.Label(self.footer_bar,textvariable=self.current_progress_str).pack(padx=10,pady=10,side="right")
+        self.stager_results_frame = ttk.Frame(self.footer_bar)
+        self.stager_results_frame.pack(fill="x",side="left")
+
+        self.info_frame = ttk.Frame(self.footer_bar)
+        self.info_frame.pack(fill="x",side="right")
+
+        self.temp_results_label = ttk.Label(self.stager_results_frame,text="Results:").pack(padx=10,pady=10,side='left')
+
+        self.elapsed_time_label = ttk.Label(self.info_frame,textvariable=self.elapsed_time_str).pack(padx=10,pady=10,side="right")
+        self.current_progress_perc_label = ttk.Label(self.info_frame,textvariable=self.current_progress_perc_str).pack(padx=10,pady=10,side="right")
+        self.current_progress_label = ttk.Label(self.info_frame,textvariable=self.current_progress_str).pack(padx=10,pady=10,side="right")
+
 # Side bar
 
         self.side_bar = ttk.Frame()
@@ -211,7 +220,8 @@ class TungstenGui(tk.Tk):
         stager_thread.BLE_path = self.ble_path
         results = stager_thread.start()
         print(results)
-
+        self.clear_child_in_frame(self.stager_results_frame)
+        self.display_results(self.stager_results_frame,results,warplen=400,align="left")
         self.info_running = False
 
     def pb_setup(self):
@@ -299,7 +309,7 @@ class TungstenGui(tk.Tk):
                 results.append(x.result())
         return results
 
-    def display_results(self,parent_label,results):
+    def display_results(self,parent_label,results,warplen:int = 55,align="top"):
     # Result[0] (string) = COM PORT
     # Result[1] (bool)= outcome
         for result in (results):
@@ -307,8 +317,8 @@ class TungstenGui(tk.Tk):
                 color = '#217346'
             else:
                 color = '#b40d1b'
-            label = ttk.Label(parent_label,text=result[0],background=color,wraplength=55)
-            label.pack(padx=10, pady=10)
+            label = ttk.Label(parent_label,text=result[0],background=color,wraplength=warplen)
+            label.pack(padx=5, pady=5,side=align)
 
     def clear_child_in_frame(self,*frames):
         for frame in frames:

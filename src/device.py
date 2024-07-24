@@ -60,8 +60,10 @@ class Device(SerialPortManger):
     
     def putc(self,data, timeout=1):
         pbytes = self.serial_port.write(data)
-        self.progress_bar_object.add_to_progress(len(data))
-        #time.sleep(0.1) # have to wait otherwise it reads nothing
+        
+        if len(data) > 1000:
+            self.progress_bar_object.add_to_progress(1024)
+
         return  pbytes or None 
     
     def push(self,path):
