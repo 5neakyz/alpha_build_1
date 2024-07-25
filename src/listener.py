@@ -37,18 +37,8 @@ class Listener():
             if self.download_temp_interrupt:
                 time.sleep(0.5)
                 continue
-            '''
-            ReadLines Version
-            '''
-            # lines = self.device.serial_port.readlines()
-            # if lines:
-            #     self.buffer_txt = self.rls_format(lines)
-            #     logging.info(f'{self.device.serial_port_name} : {self.format(lines)}')
-            '''
-            ReadLine Version
-            '''
+
             line = self.device.serial_port.readline()
-            # logging.info(f'{self.device.serial_port_name}: {line}')
             if line:
                 if b'\x1b' in line:
                     self.buffer_txt = ""
@@ -57,16 +47,3 @@ class Listener():
             stripped = line.replace(b'\r',b' ').replace(b'\x1b',b'').replace(b'[2J',b'').replace(b':',b': ')
             if stripped:
                 self.buffer_txt += stripped.decode("utf-8")
-
-    def rls_format(self,byte_array_list):
-        output = ""
-        for line in byte_array_list:
-            if b'\x1b' in line:
-                output = ""
-                split = line.split(b'\x1b')
-                line = split[-1]
-            #stripped = line.strip().replace(b'\t', b' ').replace(b'\r',b' ').replace(b'\x1b',b'').replace(b'\n',b'').replace(b'[2J',b'').replace(b':',b': ')
-            stripped = line.replace(b'\r',b' ').replace(b'\x1b',b'').replace(b'[2J',b'').replace(b':',b': ')
-            if stripped:
-                output += stripped.decode("utf-8")
-        return output

@@ -1,5 +1,6 @@
 # logging_example.py
-
+import webbrowser
+import os
 # import logging
 
 # # Create a custom logger
@@ -16,12 +17,14 @@
 # logger.warning('This is a warning')
 # logger.error('This is an error')
 # logger.info('information')
-import time
-from datetime import datetime 
 
-start_time = time.time() 
+def open_github(url):
+    webbrowser.open_new_tab(url)
 
+filename = 'C:/Users/BKNOX/code repos/Multi-ML-1.0/src/assests/doc.html'
+print(filename)
+open_github(filename)
 
-time_elapsed = time.time() - start_time
-
-print(time.strftime('%H:%M:%S', time.gmtime(61)))
+pythonfile = 'doc.html'
+ 
+print('Get current working directory : ', os.getcwd())

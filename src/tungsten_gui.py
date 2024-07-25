@@ -23,7 +23,7 @@ class TungstenGui(tk.Tk):
     def __init__(self):
         super().__init__()
         # configure window
-        self.title("5neakyz")
+        self.title("ML Multi Stager v2.0.0")
         self.geometry(f"{800}x{600}")
 
         self.bind('<KeyPress>', self.onKeyPress)
@@ -52,11 +52,12 @@ class TungstenGui(tk.Tk):
         self.devices = []
         self.notebook_Handler = None
         self.connect_btn_text_str = tk.StringVar(value='Connect')
+        self.help_doc = "assests/doc.html"
         #vars for info footer
         self.info_running = False
         self.info_interrupt = False
         self.progress_bar_object = None
-        self.current_progress = '10 / 100'
+        self.current_progress = '0 / 0'
         self.current_progress_str = tk.StringVar(value=self.current_progress)
         self.current_progress_perc = '0%'
         self.current_progress_perc_str = tk.StringVar(value=self.current_progress_perc)
@@ -78,11 +79,15 @@ class TungstenGui(tk.Tk):
         self.menu_bar.add_cascade(menu=self.menu_settings, label='Settings')
         self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
 
+        self.menu_help.add_command(label="Github",command=lambda:webbrowser.open(self.help_doc))
+
         self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","3"],)).start())
         self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","4"],)).start())
         self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","f"],)).start())
         self.menu_bar.add_command(label="G: Sys Info",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","g "],)).start())
         
+
+
         self.config(menu=self.menu_bar)
 # Footer Info Bar
         self.footer_bar = ttk.Frame()
