@@ -51,6 +51,7 @@ class TungstenGui(tk.Tk):
         self.selected_comports_str = tk.StringVar(value=self.selected_comports) # string list
         self.devices = []
         self.notebook_Handler = None
+        self.connect_btn_text_str = tk.StringVar(value='Connect')
         #vars for info footer
         self.info_running = False
         self.info_interrupt = False
@@ -73,13 +74,14 @@ class TungstenGui(tk.Tk):
         self.menu_file = tk.Menu(self.menu_bar)
         self.menu_help = tk.Menu(self.menu_bar)
         
-        self.menu_bar.add_cascade(menu=self.menu_file, label='File')
+        #self.menu_bar.add_cascade(menu=self.menu_file, label='File')
         self.menu_bar.add_cascade(menu=self.menu_settings, label='Settings')
         self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
 
         self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","3"],)).start())
         self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","4"],)).start())
         self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","f"],)).start())
+        self.menu_bar.add_command(label="G: Sys Info",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","g "],)).start())
         
         self.config(menu=self.menu_bar)
 # Footer Info Bar
@@ -92,8 +94,6 @@ class TungstenGui(tk.Tk):
         self.info_frame = ttk.Frame(self.footer_bar)
         self.info_frame.pack(fill="x",side="right")
 
-        self.temp_results_label = ttk.Label(self.stager_results_frame,text="Results:").pack(padx=10,pady=10,side='left')
-
         self.elapsed_time_label = ttk.Label(self.info_frame,textvariable=self.elapsed_time_str).pack(padx=10,pady=10,side="right")
         self.current_progress_perc_label = ttk.Label(self.info_frame,textvariable=self.current_progress_perc_str).pack(padx=10,pady=10,side="right")
         self.current_progress_label = ttk.Label(self.info_frame,textvariable=self.current_progress_str).pack(padx=10,pady=10,side="right")
@@ -103,9 +103,8 @@ class TungstenGui(tk.Tk):
         self.side_bar = ttk.Frame()
         self.side_bar.pack(fill="y",side="left")
         #create widgets
-        self.side_bar_run_btn  = ttk.Button(self.side_bar,text="Run",command=lambda: threading.Thread(daemon=True,target=self.run_btn_press).start())
-        self.side_bar_connect_btn = ttk.Button(self.side_bar,text="Connect",command=lambda: threading.Thread(daemon=True,target=self.connect_btn_press).start())
-        self.side_bar_disconnect_btn = ttk.Button(self.side_bar,text="Disconnect",command=lambda: threading.Thread(daemon=True,target=self.disconnect_btn_press).start())
+        self.side_bar_run_btn  = ttk.Button(self.side_bar,state='disable',text="Run",command=lambda: threading.Thread(daemon=True,target=self.run_btn_press).start())
+        self.side_bar_connect_btn = ttk.Button(self.side_bar,textvariable=self.connect_btn_text_str,command=lambda: threading.Thread(daemon=True,target=self.connect_disconnect_btn).start())
         self.side_bar_listbox = tk.Listbox(self.side_bar,listvariable=self.list_box_items,font=('',14),height=5,width=12)
         self.side_bar_selected_devices_frame= ttk.LabelFrame(self.side_bar,text="Selected Devices")
         self.side_bar_selected_devices_placeholder = ttk.Label(self.side_bar_selected_devices_frame,textvariable=self.selected_comports_str,wraplength=55)
@@ -119,7 +118,6 @@ class TungstenGui(tk.Tk):
         #place widgets
         self.side_bar_run_btn.grid(row=1,column=1,sticky="new",padx=20, pady=(20, 0))
         self.side_bar_connect_btn.grid(row=2,column=1,sticky="new",padx=20, pady=(20, 0))
-        self.side_bar_disconnect_btn.grid(row=3,column=1,sticky="new",padx=20, pady=(20, 0))
         # list box
         self.side_bar_listbox.grid(row=4,column=1,sticky="nw",padx=20, pady=(20, 0))
         # alternate line colors
@@ -206,23 +204,29 @@ class TungstenGui(tk.Tk):
         self.notebook_Handler.start_handler()
 
     def run_btn_press(self):
+        #button setup
+        self.side_bar_run_btn.configure(state="disable")
+        #footer loop / info setup
         self.info_running = True
         self.info_interrupt = False
         self.footer_start_time = time.time()
+        self.clear_child_in_frame(self.stager_results_frame)
         self.pb_setup()
-        stager_thread = Stager(self.devices)
         threading.Thread(daemon=True,target=self.update_footer_info_loop).start()
+        #stager setup
+        stager_thread = Stager(self.devices)
         #tasks(pers , firm , BLE)
         stager_thread.tasks  = [self.check_push_firm.get(),self.check_push_pers.get(),self.check_push_BLE.get()]
         stager_thread.progress_bar_object = self.progress_bar_object
         stager_thread.firmware_path = self.firmware_path
         stager_thread.personality_path = self.personality_path
         stager_thread.BLE_path = self.ble_path
+        # start stager
         results = stager_thread.start()
         print(results)
-        self.clear_child_in_frame(self.stager_results_frame)
         self.display_results(self.stager_results_frame,results,warplen=400,align="left")
         self.info_running = False
+        self.side_bar_run_btn.configure(state="enable")
 
     def pb_setup(self):
         if not self.firmware_path and not self.personality_path and not self.ble_path:
@@ -230,11 +234,11 @@ class TungstenGui(tk.Tk):
         
         self.progress_bar_object = pb_data()
         file_size = 0
-        if self.firmware_path:
+        if self.check_push_firm.get():
             file_size += os.stat(self.firmware_path).st_size
-        if self.personality_path:
+        if self.check_push_pers.get():
             file_size += os.stat(self.personality_path).st_size
-        if self.ble_path:
+        if self.check_push_BLE.get():
             file_size += os.stat(self.ble_path).st_size
 
         self.progress_bar_object.total = file_size * len(self.devices)
@@ -255,7 +259,16 @@ class TungstenGui(tk.Tk):
             time.sleep(0.2)
         logging.info(f'stopping footer info update loop')
 
+    def connect_disconnect_btn(self):
+        if self.connect_btn_text_str.get() == 'Connect':
+            self.connect_btn_text_str.set('Disconnect')
+            self.connect_btn_press()
+        else:
+            self.connect_btn_text_str.set('Connect')
+            self.disconnect_btn_press()
+
     def connect_btn_press(self):
+        self.side_bar_connect_btn.configure(state='disable')
         logging.info(f'Connecting : {self.selected_comports}')
         #change frame text 
         self.side_bar_selected_devices_frame.configure(text="Connecting")
@@ -275,14 +288,18 @@ class TungstenGui(tk.Tk):
         self.display_results(self.side_bar_selected_devices_frame,results)
 
         #insert logic for buttons
+        if all(result[1] for result in results):
+            self.side_bar_run_btn.configure(state='enable')
 
         #reset frame text
         self.side_bar_selected_devices_frame.configure(text="Selected Devices")
+        self.side_bar_connect_btn.configure(state='enable')
         #notebook
         self.populate_notebook()
 
     def disconnect_btn_press(self):
         self.clear_child_in_frame(self.side_bar_selected_devices_frame)
+        self.side_bar_run_btn.configure(state='disable')
         # safely disconnect current units
         for device in self.devices:
             device.listener.interrupt()
