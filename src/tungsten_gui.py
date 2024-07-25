@@ -78,9 +78,12 @@ class TungstenGui(tk.Tk):
         #self.menu_bar.add_cascade(menu=self.menu_file, label='File')
         self.menu_bar.add_cascade(menu=self.menu_settings, label='Settings')
         self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
+        
+        self.menu_settings.add_command(label="9HY",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","h","y"],)).start())
 
         self.menu_help.add_command(label="Github",command=lambda:webbrowser.open(self.help_doc))
 
+        self.menu_bar.add_command(label="esc: Main Menu",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc"],)).start())
         self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","3"],)).start())
         self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","4"],)).start())
         self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","f"],)).start())
