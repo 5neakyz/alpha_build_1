@@ -25,22 +25,22 @@ class Stager():
         to prevent unit from locking up if incompatible 
         '''
         if self.tasks[0] or self.tasks[1]: # erase config
-            logging.info(f"Erasing Config")
+            logging.info(f"STAGER: Erasing Config")
             if not device.erase_config():
                 return [device.serial_port_name,False]
             
         if self.tasks[0] : # Push Firmware
-            logging.info(f"Pushing Firmware")
+            logging.info(f"STAGER: Pushing Firmware")
             if not device.push(self.firmware_path):
                 return [device.serial_port_name,False]
             
         if self.tasks[1]: # push personality
-            logging.info(f"Pushing Personality")
+            logging.info(f"STAGER: Pushing Personality")
             if not device.push(self.personality_path):
                 return [device.serial_port_name,False]
                   
         if self.tasks[2]: # Push BLE
-            logging.info(f"Pushing BLE")
+            logging.info(f"STAGER: Pushing BLE")
             if not device.push(self.BLE_path):
                 return [device.serial_port_name,False]
             

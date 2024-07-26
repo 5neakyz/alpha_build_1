@@ -17,6 +17,7 @@ from device import Device
 from notebook_handler import NotebookHandler
 from stager import Stager
 from pb_data import pb_data
+from help_menu import HelpMenu
 #247F4C
 
 class TungstenGui(tk.Tk):
@@ -26,7 +27,7 @@ class TungstenGui(tk.Tk):
         self.title("ML Multi Stager v2.0.0")
         self.geometry(f"{800}x{600}")
 
-        self.bind('<KeyPress>', self.onKeyPress)
+        #self.bind('<KeyPress>', self.onKeyPress)
         self.bind('<Double-1>',self.copy_on_double_click)
 
         #style
@@ -80,10 +81,15 @@ class TungstenGui(tk.Tk):
         self.menu_bar.add_cascade(menu=self.menu_help, label='Help')
         
         self.menu_settings.add_command(label="9HY",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","h","y"],)).start())
+        self.menu_settings.add_command(label="9IY",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","i","y"],)).start())
+        self.menu_settings.add_command(label="9JY",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","j","y"],)).start())
+        self.menu_settings.add_command(label="9KA",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","k","a"],)).start())
+        self.menu_settings.add_command(label="9KB",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","k","b"],)).start())
+        self.menu_settings.add_command(label="9L",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","l"],)).start())
 
-        self.menu_help.add_command(label="Github",command=lambda:webbrowser.open(self.help_doc))
+        self.menu_help.add_command(label="Github",command=lambda:HelpMenu())
 
-        self.menu_bar.add_command(label="esc: Main Menu",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc"],)).start())
+        #self.menu_bar.add_command(label="esc: Main Menu",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc"],)).start())
         self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","3"],)).start())
         self.menu_bar.add_command(label="4: Status Screen",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","4"],)).start())
         self.menu_bar.add_command(label="F: Prod TS",command=lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","f"],)).start())
@@ -231,7 +237,7 @@ class TungstenGui(tk.Tk):
         stager_thread.BLE_path = self.ble_path
         # start stager
         results = stager_thread.start()
-        print(results)
+        logging.info(results)
         self.display_results(self.stager_results_frame,results,warplen=400,align="left")
         self.info_running = False
         self.side_bar_run_btn.configure(state="enable")
@@ -355,15 +361,12 @@ class TungstenGui(tk.Tk):
         head,tail = os.path.split(path)
         if type == "firm":
             self.firmware_path = path
-            print(self.firmware_path)
             self.firmware_path_str.set(tail)
         if type == "pers":
             self.personality_path = path
-            print(self.personality_path)
             self.personality_path_str.set(tail)
         if type == "ble":
             self.ble_path = path
-            print(self.ble_path)
             self.ble_path_str.set(tail)
         
     def items_selected(self,event):
@@ -438,5 +441,5 @@ class TungstenGui(tk.Tk):
 
 if __name__ == "__main__":
     format = "%(asctime)s.%(msecs)04d - %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
+    logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
     TungstenGui()

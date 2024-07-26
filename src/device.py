@@ -67,7 +67,6 @@ class Device(SerialPortManger):
         return  pbytes or None 
     
     def push(self,path):
-        print("PUSHING")
         # basic check on path
         if not path:
             print(f'FAILED PATH {path}')
@@ -80,19 +79,21 @@ class Device(SerialPortManger):
         
         # setup xmodem
         modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
-        print(modem.log)
         stream = open(path, 'rb')
 
         #open download menu of unit
         self.write_commands(["esc","6"])
         time.sleep(1)
         self.listener.pause_read()
-        logging.info(f'Started: Sending file')
+        time.sleep(0.5)
+        logging.info(f'{self.serial_port_name}: initiating Xmodem send')
         #send file
         status = modem.send(stream)
-        logging.info(f'Data Stream Status: {status}')
+        logging.info(f'{self.serial_port_name}:Data Stream Status: {status}')
+
         if not status:
             return False
+        
         self.listener.continue_read()
         # checks
         # logging.info(f'Begging checks:')
@@ -104,7 +105,7 @@ class Device(SerialPortManger):
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        logging.info(f"Pushed File. Starting Checks")
+        logging.info(f"{self.serial_port_name}: Checking")
         for _ in range(120):
             time.sleep(0.5)
             lines = self.listener.get_buffer()
@@ -113,19 +114,19 @@ class Device(SerialPortManger):
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
-                print("SENDING CTRL X")
+                logging.info("SENDING CTRL X")
                 break
 
             if "install failed" in str(lines):
-                print(f'INSTALL FAILED')
+                logging.debug(f'INSTALL FAILED')
                 return False
             
             if "Abort" in str(lines):
-                print(f'INSTALL FAILED')
+                logging.debug(f'INSTALL FAILED')
                 return False
             
             if "Hello" in str(lines):
-                logging.info(f'Unit replied with Hello')
+                #logging.info(f'Unit replied with Hello')
                 break 
             
         return True
