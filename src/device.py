@@ -4,10 +4,12 @@ from xmodem import XMODEM
 from serial_port_manager import SerialPortManger
 from listener import Listener
 
+logger = logging.getLogger(__name__)
+
 class Device(SerialPortManger):
     def __init__(self,parent,progress_bar_object=None):
         super().__init__(parent)
-        logging.info(f'{self.serial_port_name}: Creating Device Object')
+        logger.info(f'{self.serial_port_name}: Creating Device Object')
         self.progress_bar_object = progress_bar_object
         self.listener = Listener(self)
         self.listener.start_listening()
@@ -19,7 +21,7 @@ class Device(SerialPortManger):
                 time.sleep(0.5)
                 x = self.listener.get_buffer()
                 if "Main Menu" in str(x):
-                    logging.info(f'{self.serial_port_name}: is Alive')
+                    logger.info(f'{self.serial_port_name}: is Alive')
                     return True
         return False
 
@@ -36,14 +38,14 @@ class Device(SerialPortManger):
 
     def write_commands(self,commands:list):
         if self.serial_connection:
-            logging.info(f'{self.serial_port_name}: Sending Command(s): {commands}')
+            logger.info(f'{self.serial_port_name}: Sending Command(s): {commands}')
             for command in commands:
                 if command =="esc":
                     command = (chr(27))     
                 try:
                     self.serial_port.write(command.encode())
                 except Exception:
-                    logging.info(f'{self.serial_port_name}: Failed Sending Commands')
+                    logger.warning(f'{self.serial_port_name}: Failed Sending Commands')
                     return False
             return True
         return False
@@ -69,12 +71,12 @@ class Device(SerialPortManger):
     def push(self,path):
         # basic check on path
         if not path:
-            print(f'FAILED PATH {path}')
+            logger.warning(f'FAILED PATH {path}')
             return False 
 
         #check unit is responsive 
         if not self.is_alive():
-            print("NOT ALIVE")
+            logger.warning("NOT ALIVE")
             return False
         
         # setup xmodem
@@ -86,17 +88,18 @@ class Device(SerialPortManger):
         time.sleep(1)
         self.listener.pause_read()
         time.sleep(0.5)
-        logging.info(f'{self.serial_port_name}: initiating Xmodem send')
+        logger.info(f'{self.serial_port_name}: initiating Xmodem send')
         #send file
         status = modem.send(stream)
-        logging.info(f'{self.serial_port_name}:Data Stream Status: {status}')
+        logger.info(f'{self.serial_port_name}:Data Stream Status: {status}')
 
         if not status:
+            logger.warning(f'{self.serial_port_name}: XMODEM FAILED. STATUS: {status}')
             return False
         
         self.listener.continue_read()
         # checks
-        # logging.info(f'Begging checks:')
+        # logger.info(f'Begging checks:')
         if not self.install_checker():
             return False
 
@@ -105,7 +108,7 @@ class Device(SerialPortManger):
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        logging.info(f"{self.serial_port_name}: Checking")
+        logger.info(f"{self.serial_port_name}: Checking")
         for _ in range(120):
             time.sleep(0.5)
             lines = self.listener.get_buffer()
@@ -114,19 +117,19 @@ class Device(SerialPortManger):
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
-                logging.info("SENDING CTRL X")
+                logger.info("SENDING CTRL X")
                 break
 
             if "install failed" in str(lines):
-                logging.debug(f'INSTALL FAILED')
+                logger.warning(f'INSTALL FAILED')
                 return False
             
             if "Abort" in str(lines):
-                logging.debug(f'INSTALL FAILED')
+                logger.warning(f'INSTALL FAILED')
                 return False
             
             if "Hello" in str(lines):
-                #logging.info(f'Unit replied with Hello')
+                #logger.info(f'Unit replied with Hello')
                 break 
             
         return True

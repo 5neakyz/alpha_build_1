@@ -20,6 +20,8 @@ from pb_data import pb_data
 from help_menu import HelpMenu
 #247F4C
 
+logger = logging.getLogger(__name__)
+
 class TungstenGui(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -237,7 +239,7 @@ class TungstenGui(tk.Tk):
         stager_thread.BLE_path = self.ble_path
         # start stager
         results = stager_thread.start()
-        logging.info(results)
+        logger.info(results)
         self.display_results(self.stager_results_frame,results,warplen=400,align="left")
         self.info_running = False
         self.side_bar_run_btn.configure(state="enable")
@@ -271,7 +273,7 @@ class TungstenGui(tk.Tk):
             self.elapsed_time = time.strftime('%H:%M:%S', time.gmtime(time.time() - self.footer_start_time))
             self.elapsed_time_str.set(self.elapsed_time)
             time.sleep(0.2)
-        logging.info(f'stopping footer info update loop')
+        logger.info(f'stopping footer info update loop')
 
     def connect_disconnect_btn(self):
         if self.connect_btn_text_str.get() == 'Connect':
@@ -283,7 +285,7 @@ class TungstenGui(tk.Tk):
 
     def connect_btn_press(self):
         self.side_bar_connect_btn.configure(state='disable')
-        logging.info(f'Connecting : {self.selected_comports}')
+        logger.info(f'Connecting : {self.selected_comports}')
         #change frame text 
         self.side_bar_selected_devices_frame.configure(text="Connecting")
         #remove all in selected devices frame
@@ -318,7 +320,7 @@ class TungstenGui(tk.Tk):
         for device in self.devices:
             device.listener.interrupt()
             device.disconnect()
-            logging.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
+            logger.info(f'{device.serial_port_name} TEXT BOX UPDATE READ {device.listener.needs_interrupt,device.serial_connection}')
         if self.notebook_Handler:
             self.notebook_Handler.interrupt()
         #resets all comport variables and re-searches for any new comports
@@ -372,7 +374,7 @@ class TungstenGui(tk.Tk):
     def items_selected(self,event):
         try:
             selected_item = event.widget.get(self.side_bar_listbox.curselection()[0])
-            logging.info(f'Selected: {selected_item}')
+            logger.info(f'Selected: {selected_item}')
             if selected_item in self.selected_comports:
                 (self.selected_comports.remove(selected_item))
             else:
@@ -437,7 +439,7 @@ class TungstenGui(tk.Tk):
         self.info_interrupt = True
         self.devices.clear()
         self.destroy()
-        logging.info(f'Safely closed')
+        logger.info(f'Safely closed')
 
 if __name__ == "__main__":
     format = "%(asctime)s.%(msecs)04d - %(message)s"

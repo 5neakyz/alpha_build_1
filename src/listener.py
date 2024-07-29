@@ -1,9 +1,12 @@
 import threading
 import logging
 import time
+
+logger = logging.getLogger(__name__)
+
 class Listener():
     def __init__(self,device:object):
-        logging.info(f'{device.serial_port_name}: Creating Listener Object')
+        logger.info(f'{device.serial_port_name}: Creating Listener Object')
         self.device = device
         self.is_running = False
         self.needs_interrupt = False 
@@ -11,27 +14,27 @@ class Listener():
         self.download_temp_interrupt = False
 
     def continue_read(self):
-        logging.info(f'{self.device.serial_port_name}: continuing Listener')
+        logger.info(f'{self.device.serial_port_name}: continuing Listener')
         self.download_temp_interrupt = False        
 
     def pause_read(self):
-        logging.info(f'{self.device.serial_port_name}: Pausing Listener')
+        logger.info(f'{self.device.serial_port_name}: Pausing Listener')
         self.download_temp_interrupt = True  
 
     def get_buffer(self):
         return self.buffer_txt
     
     def interrupt(self):
-        logging.info(f'{self.device.serial_port_name}: Interrupting Listener')
+        logger.info(f'{self.device.serial_port_name}: Interrupting Listener')
         self.needs_interrupt = True
 
     def start_listening(self):
-        logging.info(f'{self.device.serial_port_name}: Starting Listener')
+        logger.info(f'{self.device.serial_port_name}: Starting Listener')
         threading.Thread(daemon=True,target=self.listening).start()
 
     def listening(self):
         self.is_running = True
-        logging.info(f'{self.device.serial_port_name}: Thread Started, Listening')
+        logger.info(f'{self.device.serial_port_name}: Thread Started, Listening')
 
         while self.is_running and not self.needs_interrupt:
             if self.download_temp_interrupt:

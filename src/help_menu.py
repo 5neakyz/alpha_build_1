@@ -4,6 +4,10 @@ from tkinter import filedialog as fd
 from tkinter import scrolledtext
 import os
 import sys
+
+import logging
+logger = logging.getLogger(__name__)
+
 class HelpMenu(tk.Toplevel):
     def __init__(self,master=None):
         super().__init__(master=None)

@@ -2,6 +2,8 @@ import concurrent.futures
 import time
 import logging
 
+logger = logging.getLogger(__name__)
+
 class Stager():
     def __init__(self,devices:list,progress_bar_object:object=None,personality_path:str=None,firmware_path:str=None,BLE_path:str=None,tasks:list=[0,0,0],):
         self.devices = devices
@@ -25,22 +27,22 @@ class Stager():
         to prevent unit from locking up if incompatible 
         '''
         if self.tasks[0] or self.tasks[1]: # erase config
-            logging.info(f"STAGER: Erasing Config")
+            logger.info(f"STAGER: Erasing Config")
             if not device.erase_config():
                 return [device.serial_port_name,False]
             
         if self.tasks[0] : # Push Firmware
-            logging.info(f"STAGER: Pushing Firmware")
+            logger.info(f"STAGER: Pushing Firmware")
             if not device.push(self.firmware_path):
                 return [device.serial_port_name,False]
             
         if self.tasks[1]: # push personality
-            logging.info(f"STAGER: Pushing Personality")
+            logger.info(f"STAGER: Pushing Personality")
             if not device.push(self.personality_path):
                 return [device.serial_port_name,False]
                   
         if self.tasks[2]: # Push BLE
-            logging.info(f"STAGER: Pushing BLE")
+            logger.info(f"STAGER: Pushing BLE")
             if not device.push(self.BLE_path):
                 return [device.serial_port_name,False]
             
