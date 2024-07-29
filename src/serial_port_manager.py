@@ -3,14 +3,14 @@ import serial
 import logging
 
 class SerialPortManger():
-    def __init__(self,comport_name):
+    def __init__(self,comport_name:str):
         self.serial_connection = False
         self.serial_port = None
         self.serial_port_name = comport_name
         self.serial_port_baud = 115200
 
         try:
-            self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=0.1)
+            self.serial_port = serial.Serial(port = self.serial_port_name, baudrate=self.serial_port_baud, timeout=0.1,write_timeout=0.2)
             self.serial_connection = True
             logging.info(f'{self.serial_port_name}: Connection Established')
         except Exception:

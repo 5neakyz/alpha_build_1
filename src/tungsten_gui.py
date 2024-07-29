@@ -87,7 +87,7 @@ class TungstenGui(tk.Tk):
         self.menu_settings.add_command(label="9KB",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","k","b"],)).start())
         self.menu_settings.add_command(label="9L",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","9","l"],)).start())
 
-        self.menu_help.add_command(label="Github",command=lambda:HelpMenu())
+        self.menu_help.add_command(label="Help",command=lambda: HelpMenu(self))
 
         #self.menu_bar.add_command(label="esc: Main Menu",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc"],)).start())
         self.menu_bar.add_command(label="3: View Config",command = lambda: threading.Thread(daemon=True,target=self.send_commands,args=(["esc","3"],)).start())
@@ -332,7 +332,7 @@ class TungstenGui(tk.Tk):
         self.side_bar_selected_devices_placeholder = ttk.Label(self.side_bar_selected_devices_frame,textvariable=self.selected_comports_str,wraplength=55)
         self.side_bar_selected_devices_placeholder.pack(padx=20,pady=20)
 
-    def create_threadpool(self,function,items):
+    def create_threadpool(self,function,items:list) ->list:
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:# parallelism 
             tasks = [executor.submit(function,item) for item in items]
@@ -380,12 +380,12 @@ class TungstenGui(tk.Tk):
             self.selected_comports_str.set(self.selected_comports)
         except Exception as e: print(e)
 
-    def resource_path(self,relative_path):
+    def resource_path(self,relative_path) -> str:
         """ Get absolute path to resource, works for dev and for PyInstaller """
         base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
         return os.path.join(base_path, relative_path)
     
-    def get_comport_names(self):
+    def get_comport_names(self)-> list:
         comport_list = []
         for item in self.raw_comports:
             comport_list.append(item.device)

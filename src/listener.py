@@ -2,7 +2,7 @@ import threading
 import logging
 import time
 class Listener():
-    def __init__(self,device):
+    def __init__(self,device:object):
         logging.info(f'{device.serial_port_name}: Creating Listener Object')
         self.device = device
         self.is_running = False

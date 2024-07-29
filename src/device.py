@@ -34,10 +34,10 @@ class Device(SerialPortManger):
             return True
         return False
 
-    def write_commands(self,commands):
+    def write_commands(self,commands:list):
         if self.serial_connection:
             logging.info(f'{self.serial_port_name}: Sending Command(s): {commands}')
-            for i, command in enumerate(commands):
+            for command in commands:
                 if command =="esc":
                     command = (chr(27))     
                 try:

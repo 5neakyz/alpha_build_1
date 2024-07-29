@@ -4,9 +4,9 @@ from tkinter import filedialog as fd
 from tkinter import scrolledtext
 import os
 import sys
-class HelpMenu(tk.Tk):
-    def __init__(self):
-        super().__init__()
+class HelpMenu(tk.Toplevel):
+    def __init__(self,master=None):
+        super().__init__(master=None)
         # configure window
         self.title("Helpful Info - ML Multi Stager v2.0.0")
         self.geometry(f"{800}x{600}")
@@ -16,7 +16,7 @@ class HelpMenu(tk.Tk):
         icon_path = self.resource_path("assests/myicon.ico")
         self.iconbitmap(icon_path)
         style_path = self.resource_path('assests/Forest-ttk-theme-master/forest-dark.tcl')
-        self.tk.call('source', style_path)
+        #self.tk.call('source', style_path)
         ttk.Style().theme_use('forest-dark')
         s = ttk.Style()
         self.protocol("WM_DELETE_WINDOW",self.close_window)
@@ -33,7 +33,7 @@ class HelpMenu(tk.Tk):
         self.p5 ='For the Stager to successfully establish a connection with an ML unit, it must be able to read the main menu.\nSo, a connection failure may not necessarily be an indication of a faulty connection or lack of power, but a unit behaving erratically.'
         self.p6 = 'Baud rate is 115200\nFile Transfer Protocol is Xmodem1k'
         self.p7 = 'If you select to push either Firmware or Personality, The Stager will Erase Config before pushing anything.\nIf you are only pushing a BLE file it will Not Erase Config.\nThis is to prevent cases were the unit locks up as firmware and personality are not compatible.'
-        self.p8 = 'The exact file size and the exact number of bytes sent may not precisely match. But it is still a good indication of progress.'
+        self.p8 = 'The exact file size and the exact number of bytes sent may not precisely match, but it is still a good indication of progress.'
 
         self.header_text_str = tk.StringVar(value=self.header_text)
         self.p1_str = tk.StringVar(value=self.p1)
@@ -50,7 +50,7 @@ class HelpMenu(tk.Tk):
         self.p1_lbl = ttk.Label(self,textvariable=self.p1_str).pack(padx=10,pady=5,side='top',anchor="nw")
         self.p2_lbl = ttk.Label(self,textvariable=self.p2_str).pack(padx=10,pady=5,side='top',anchor="nw")
 
-        self.pf_frame = ttk.Frame()
+        self.pf_frame = ttk.Frame(self)
         self.pf_frame.pack(fill='x',side='top',anchor='nw',padx=10,pady=5)
         self.pf_frame.columnconfigure((1,2),weight=0)
         self.pf_frame.rowconfigure((1,2),weight=0)
