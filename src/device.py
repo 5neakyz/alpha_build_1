@@ -71,76 +71,85 @@ class Device(SerialPortManger):
     def push(self,path):
         # basic check on path
         if not path:
-            logger.warning(f'FAILED PATH {path}')
+            logger.critical(f'FAILED PATH {path}')
             return False 
 
         #check unit is responsive 
         if not self.is_alive():
-            logger.warning("NOT ALIVE")
+            logger.critical(f'{self.serial_port_name}: Not Alive')
             return False
         
         # setup xmodem
-        modem = XMODEM(self.getc, self.putc,'xmodem1k')#modes  xmodem , xmodem1k , xmodemcrc
-        stream = open(path, 'rb')
+        try:
+            stream = open(path, 'rb')
+        except Exception:
+            logger.critical(f'{self.serial_port_name}: cannot read file')
 
-        #open download menu of unit
+        #open download menu of unit and pause reading
         self.write_commands(["esc","6"])
         time.sleep(1)
         self.listener.pause_read()
         time.sleep(0.5)
-        logger.info(f'{self.serial_port_name}: initiating Xmodem send')
-        #send file
-        status = modem.send(stream)
-        logger.info(f'{self.serial_port_name}:Data Stream Status: {status}')
 
+        #xmodem send file
+        logger.info(f'{self.serial_port_name}: initiating Xmodem send')
+        status = XMODEM(self.getc, self.putc,'xmodem1k').send(stream)
+        logger.info(f'{self.serial_port_name}:Data Stream Status: {status}')
         if not status:
-            logger.warning(f'{self.serial_port_name}: XMODEM FAILED. STATUS: {status}')
+            logger.critical(f'{self.serial_port_name}: XMODEM FAILED. STATUS: {status}')
             return False
         
         self.listener.continue_read()
+
         # checks
-        logger.info(f'{self.serial_port_name}:  Begging checks:')
         if not self.install_checker():
             return False
+        
+        if not self.responsive():
+            return False
+        
+
         logger.info(f'{self.serial_port_name} Pushing finished Returning True')
         return True
     
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        logger.info(f"{self.serial_port_name}: Checking")
-        for _ in range(120):
-            time.sleep(0.5)
+        logger.info(f"{self.serial_port_name}: Checking unit response")
+        for _ in range(60):
             lines = self.listener.get_buffer()
 
             if not lines: continue
             
-            if "Ctrl X" in str(lines):
-                self.write_commands(chr(24))
-                logger.info(f"{self.serial_port_name} SENDING CTRL X")
-                time.sleep(5)
-                continue
-
             if "install failed" in str(lines):
-                logger.warning(f'{self.serial_port_name} INSTALL FAILED')
+                logger.critical(f'{self.serial_port_name} INSTALL FAILED')
                 return False
             
             if "Abort" in str(lines):
-                logger.warning(f'{self.serial_port_name} INSTALL FAILED')
+                logger.critical(f'{self.serial_port_name} INSTALL FAILED')
                 return False
             
             if "Hello" in str(lines):
                 logger.info(f'{self.serial_port_name} Unit replied with Hello')
-                break
-            
-            logger.info(f'{self.serial_port_name},Install Check - IS ALIVE')
-
-            if self.is_alive():
-                logger.info(f'{self.serial_port_name} is alive check done')
                 return True
-            else:
-                logger.info(f'{self.serial_port} not alive continue')
-                continue
             
-        logger.info('{self.serial_port_name}, CHECKER TIMEOUT')
+            if "Ctrl X" in str(lines):
+                self.write_commands(chr(24))
+                logger.info(f"{self.serial_port_name} SENDING CTRL X")
+                continue
+            time.sleep(0.5)
+            
+        logger.warning(f'{self.serial_port_name}, CHECKER TIMEOUT')
         return False
+    
+    def responsive(self):
+        logger.info(f"{self.serial_port_name}: waiting for unit to install and unlock")
+        for _ in range (120):
+            if self.is_alive():
+                return True
+            time.sleep(0.5)
+
+        logger.warning(f'{self.serial_port_name}, responsive check TIMEOUT')
+        return False
+
+
