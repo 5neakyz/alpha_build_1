@@ -99,10 +99,10 @@ class Device(SerialPortManger):
         
         self.listener.continue_read()
         # checks
-        # logger.info(f'Begging checks:')
+        logger.info(f'{self.serial_port_name}:  Begging checks:')
         if not self.install_checker():
             return False
-
+        logger.info(f'{self.serial_port_name} Pushing finished Returning True')
         return True
     
     def install_checker(self):
@@ -117,19 +117,30 @@ class Device(SerialPortManger):
             
             if "Ctrl X" in str(lines):
                 self.write_commands(chr(24))
-                logger.info("SENDING CTRL X")
-                break
+                logger.info(f"{self.serial_port_name} SENDING CTRL X")
+                time.sleep(5)
+                continue
 
             if "install failed" in str(lines):
-                logger.warning(f'INSTALL FAILED')
+                logger.warning(f'{self.serial_port_name} INSTALL FAILED')
                 return False
             
             if "Abort" in str(lines):
-                logger.warning(f'INSTALL FAILED')
+                logger.warning(f'{self.serial_port_name} INSTALL FAILED')
                 return False
             
             if "Hello" in str(lines):
-                #logger.info(f'Unit replied with Hello')
-                break 
+                logger.info(f'{self.serial_port_name} Unit replied with Hello')
+                break
             
-        return True
+            logger.info(f'{self.serial_port_name},Install Check - IS ALIVE')
+
+            if self.is_alive():
+                logger.info(f'{self.serial_port_name} is alive check done')
+                return True
+            else:
+                logger.info(f'{self.serial_port} not alive continue')
+                continue
+            
+        logger.info('{self.serial_port_name}, CHECKER TIMEOUT')
+        return False
