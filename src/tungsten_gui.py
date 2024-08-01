@@ -193,14 +193,26 @@ class TungstenGui(tk.Tk):
         self.firmware_label.grid(row=1,column=2,padx=2,pady=2,sticky="w")
         self.personality_label.grid(row=2,column=2,padx=2,pady=2,sticky="w")
         self.ble_label.grid(row=3,column=2,padx=2,pady=2,sticky="w")
-    #display tabs
-        self.tab_view = ttk.Notebook()
-        self.tab_view.pack(fill="both",expand=True,padx=5,pady=5)
 
-        self.new_pad = ttk.Frame(self.tab_view)
+    #display 
 
-        self.tab_view.add(self.new_pad,text="Tab 1")
+        self.root_display_frame = ttk.sc(style='red.TFrame',borderwidth=0)
+        self.root_display_frame.pack(fill="both",expand=True,padx=5,pady=5)
+        self.hscrollbar = ttk.Scrollbar(self.root_display_frame, orient=tk.HORIZONTAL)
+        self.vscrollbar = ttk.Scrollbar(self.root_display_frame, orient=tk.VERTICAL)
+        self.hscrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+        #display test
+        mockdevices = ['COM1','COM2','COM3','COM4']
+        for device in mockdevices:
+            struc_frame = ttk.Frame(self.root_display_frame)
+            struc_frame.pack(side='left',padx=10,pady=10)
+            header = ttk.Label(struc_frame,text=device)
+            header.pack()
+            unit_text = tk.Text(struc_frame)
+            unit_text.insert(tk.INSERT,'TEST TEST TEST')
+            unit_text.pack(fill='y')
 
         self.mainloop()
 
