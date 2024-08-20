@@ -14,9 +14,9 @@ class Device(SerialPortManger):
         self.listener = Listener(self)
         self.listener.start_listening()
 
-    def is_alive (self):
+    def is_alive (self,loop=5):
         if self.serial_connection:
-            for _ in range(5):
+            for _ in range(loop):
                 self.write_commands(["esc"])
                 time.sleep(0.5)
                 x = self.listener.get_buffer()
@@ -137,6 +137,10 @@ class Device(SerialPortManger):
                 self.write_commands(chr(24))
                 logger.info(f"{self.serial_port_name} SENDING CTRL X")
                 continue
+            
+            if self.is_alive(self,loop=1):
+                return True
+            
             time.sleep(0.5)
             
         logger.warning(f'{self.serial_port_name}, CHECKER TIMEOUT')
