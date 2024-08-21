@@ -108,15 +108,14 @@ class Device(SerialPortManger):
         if not self.responsive():
             return False
         
-
         logger.info(f'{self.serial_port_name} Pushing finished Returning True')
         return True
     
     def install_checker(self):
         '''Ml30s on 3.17 need you to either wait 10 seconds or Ctrl X to confirm and install, 
         if you press esc it will cancel install'''
-        logger.info(f"{self.serial_port_name}: Checking unit response")
-        for _ in range(60):
+        logger.info(f"{self.serial_port_name}: Install check")
+        for _ in range(120):
             lines = self.listener.get_buffer()
 
             if not lines: continue
@@ -134,13 +133,11 @@ class Device(SerialPortManger):
                 return True
             
             if "Ctrl X" in str(lines):
-                self.write_commands(chr(24))
                 logger.info(f"{self.serial_port_name} SENDING CTRL X")
-                continue
-            
-            if self.is_alive(self,loop=1):
+                #self.write_commands(chr(24))
+                time.sleep(10)
                 return True
-            
+
             time.sleep(0.5)
             
         logger.warning(f'{self.serial_port_name}, CHECKER TIMEOUT')

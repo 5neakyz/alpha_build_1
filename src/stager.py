@@ -23,7 +23,7 @@ class Stager():
     def stage(self,device:object):
         device.progress_bar_object = self.progress_bar_object   
         '''
-        if we are pushing either personality or firmware eras config
+        if we are pushing either personality or firmware erase config
         to prevent unit from locking up if incompatible 
         '''
         if self.tasks[0] or self.tasks[1]: # erase config
@@ -45,6 +45,8 @@ class Stager():
             logger.info(f"STAGER: Pushing BLE")
             if not device.push(self.BLE_path):
                 return [device.serial_port_name,False]
+        
+        device.write_commands(["esc","f"])
             
         return [device.serial_port_name,True]
  
