@@ -134,6 +134,11 @@ class Device(SerialPortManger):
                 time.sleep(10)
                 return True
             
+            if "Starting reboot" in str(lines):
+                logger.info(f"{self.serial_port_name} starting reboot")
+                time.sleep(2)
+                return True
+
             if "Hello" in str(lines):
                 logger.info(f'{self.serial_port_name} Unit replied with Hello')
                 return True
