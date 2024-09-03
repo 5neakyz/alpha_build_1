@@ -128,15 +128,16 @@ class Device(SerialPortManger):
                 logger.critical(f'{self.serial_port_name} INSTALL FAILED')
                 return False
             
-            if "Hello" in str(lines):
-                logger.info(f'{self.serial_port_name} Unit replied with Hello')
-                return True
-            
             if "Ctrl X" in str(lines):
                 logger.info(f"{self.serial_port_name} SENDING CTRL X")
                 #self.write_commands(chr(24))
                 time.sleep(10)
                 return True
+            
+            if "Hello" in str(lines):
+                logger.info(f'{self.serial_port_name} Unit replied with Hello')
+                return True
+            
 
             time.sleep(0.5)
             
